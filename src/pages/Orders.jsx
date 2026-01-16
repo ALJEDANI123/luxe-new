@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Order } from "@/entities/all";
+import { Order } from "@/entities/Order";
 import { base44 } from '@/api/base44Client';
 import { format } from "date-fns";
 import { Package, Calendar, Truck, CheckCircle } from "lucide-react";

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Product, CartItem } from "@/entities/all";
+import { Product } from "@/entities/Product";
+import { CartItem } from "@/entities/CartItem";
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from "@/utils";
 import {
