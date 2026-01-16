@@ -40,6 +40,8 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
                 const extractedData = response.data.data;
                 const slug = extractedData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || '';
                 
+                console.log('البيانات المستخرجة:', extractedData);
+                
                 setFormData({
                     title: extractedData.title || '',
                     slug: slug,
@@ -56,6 +58,8 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
                     isMysteryBoxCandidate: true,
                     category_id: '',
                 });
+                
+                alert(`تم استخراج: ${extractedData.title}, السعر: $${extractedData.price}, التقييم: ${extractedData.rating}`);
             } else {
                 alert('حدث خطأ أثناء استخراج البيانات');
             }

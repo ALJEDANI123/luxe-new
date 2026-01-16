@@ -121,9 +121,9 @@ export default function Admin() {
                                 <TableRow>
                                     <TableHead>Image</TableHead>
                                     <TableHead>Name</TableHead>
-                                    <TableHead>Category</TableHead>
+                                    <TableHead>Marketplace</TableHead>
                                     <TableHead>Price</TableHead>
-                                    <TableHead>Stock</TableHead>
+                                    <TableHead>Rating</TableHead>
                                     <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -132,15 +132,15 @@ export default function Admin() {
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             <img 
-                                                src={product.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=50&h=50&fit=crop'} 
-                                                alt={product.name} 
+                                                src={product.images?.[0] || product.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=50&h=50&fit=crop'} 
+                                                alt={product.title || product.name} 
                                                 className="w-12 h-12 object-cover rounded-md" 
                                             />
                                         </TableCell>
-                                        <TableCell className="font-medium">{product.name}</TableCell>
-                                        <TableCell className="capitalize">{product.category}</TableCell>
+                                        <TableCell className="font-medium">{product.title || product.name}</TableCell>
+                                        <TableCell className="capitalize">{product.marketplace || product.category || 'N/A'}</TableCell>
                                         <TableCell>{formatPrice(product.price)}</TableCell>
-                                        <TableCell>{product.stock}</TableCell>
+                                        <TableCell>⭐ {product.rating || 0}</TableCell>
                                         <TableCell>
                                             <Button variant="outline" size="icon" onClick={() => handleEdit(product)}>
                                                 <Edit className="w-4 h-4" />
