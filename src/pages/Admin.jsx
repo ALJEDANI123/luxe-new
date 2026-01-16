@@ -18,7 +18,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from '../components/ui/dialog';
-import { Edit, PlusCircle } from 'lucide-react';
+import { Edit, PlusCircle, Trash2 } from 'lucide-react';
 import ProductForm from '../components/admin/ProductForm';
 import { formatPrice } from '../components/utils/helpers';
 
@@ -76,6 +76,20 @@ export default function Admin() {
             console.error("Failed to save product:", error);
         }
         setIsSaving(false);
+    };
+
+    const handleDelete = async (productId) => {
+        if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+            return;
+        }
+        
+        try {
+            await base44.entities.Product.delete(productId);
+            setProducts(products.filter(p => p.id !== productId));
+        } catch (error) {
+            console.error("Failed to delete product:", error);
+            alert('حدث خطأ أثناء حذف المنتج');
+        }
     };
 
 
@@ -142,9 +156,14 @@ export default function Admin() {
                                         <TableCell>{formatPrice(product.price)}</TableCell>
                                         <TableCell>⭐ {product.rating || 0}</TableCell>
                                         <TableCell>
-                                            <Button variant="outline" size="icon" onClick={() => handleEdit(product)}>
-                                                <Edit className="w-4 h-4" />
-                                            </Button>
+                                            <div className="flex gap-2">
+                                                <Button variant="outline" size="icon" onClick={() => handleEdit(product)}>
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
+                                                <Button variant="destructive" size="icon" onClick={() => handleDelete(product.id)}>
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

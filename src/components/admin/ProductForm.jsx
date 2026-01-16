@@ -129,31 +129,40 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
                     )}
 
                     {/* المعلومات الأساسية */}
-                    <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-3">
                         <div>
-                            <Label className="text-xs text-gray-500">العنوان</Label>
-                            <p className="font-semibold">{formData.title}</p>
+                            <Label className="text-xs text-gray-500 font-bold">العنوان</Label>
+                            <p className="font-semibold text-base mt-1">{formData.title || 'غير متوفر'}</p>
                         </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <Label className="text-xs text-gray-500 font-bold">السعر</Label>
+                                <p className="font-bold text-2xl text-purple-600 mt-1">${formData.price || '0'}</p>
+                            </div>
+                            <div>
+                                <Label className="text-xs text-gray-500 font-bold">المتجر</Label>
+                                <p className="font-semibold mt-1">{formData.marketplace || 'غير محدد'}</p>
+                            </div>
+                        </div>
+                        
                         <div>
-                            <Label className="text-xs text-gray-500">السعر</Label>
-                            <p className="font-semibold text-purple-600">${formData.price}</p>
+                            <Label className="text-xs text-gray-500 font-bold">التقييم والمراجعات</Label>
+                            <p className="font-semibold text-lg mt-1">
+                                ⭐ {formData.rating || 0}/5 
+                                <span className="text-sm text-gray-600 mr-2">
+                                    ({(formData.reviewsCount || 0).toLocaleString()} مراجعة)
+                                </span>
+                            </p>
                         </div>
-                        <div>
-                            <Label className="text-xs text-gray-500">التقييم</Label>
-                            <p className="font-semibold">⭐ {formData.rating} ({formData.reviewsCount} مراجعة)</p>
-                        </div>
-                        <div>
-                            <Label className="text-xs text-gray-500">المتجر</Label>
-                            <p className="font-semibold">{formData.marketplace}</p>
-                        </div>
+                        
+                        {formData.subtitle && (
+                            <div>
+                                <Label className="text-xs text-gray-500 font-bold">الوصف</Label>
+                                <p className="text-sm mt-1 leading-relaxed">{formData.subtitle}</p>
+                            </div>
+                        )}
                     </div>
-
-                    {formData.subtitle && (
-                        <div>
-                            <Label className="text-xs text-gray-500">الوصف</Label>
-                            <p className="text-sm">{formData.subtitle}</p>
-                        </div>
-                    )}
 
                     {formData.tags && formData.tags.length > 0 && (
                         <div>
