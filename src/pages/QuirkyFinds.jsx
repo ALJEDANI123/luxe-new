@@ -4,16 +4,14 @@ import { base44 } from '../api/base44Client';
 import { Sparkles, PlusCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import ProductCard from '../components/ProductCard';
-import { useAuth } from '@/lib/AuthContext'; // Import useAuth hook
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
-import { createPageUrl } from '../utils'; // Import createPageUrl
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '../utils';
 
 export default function QuirkyFinds() {
     const [products, setProducts] = useState([]);
     const [userFavorites, setUserFavorites] = useState([]);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const { user: authUser } = useAuth(); // Get authenticated user from AuthContext
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,7 +35,7 @@ export default function QuirkyFinds() {
     };
 
     const handleAddNewQuirkyFind = () => {
-        navigate(createPageUrl('Admin')); // Navigate to the Admin page
+        navigate(createPageUrl('Admin'));
     };
 
     return (
@@ -71,8 +69,13 @@ export default function QuirkyFinds() {
             </div>
 
             {/* Add New Quirky Find Button (Admin Only) */}
-            {authUser && authUser.role === 'admin' && (
-                <div className="text-center mb-12">
+            {user && user.role === 'admin' && (
+                <motion.div 
+                    className="text-center mb-12"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                >
                     <Button 
                         onClick={handleAddNewQuirkyFind}
                         className="bg-gradient-to-r from-[var(--color-teal)] to-[var(--color-blue)] hover:from-[var(--color-teal)] hover:to-[var(--color-blue)] text-white font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
@@ -80,7 +83,7 @@ export default function QuirkyFinds() {
                         <PlusCircle className="w-5 h-5 mr-2" />
                         أضف منتجًا غريبًا جديدًا
                     </Button>
-                </div>
+                </motion.div>
             )}
 
             {/* Products Grid */}
