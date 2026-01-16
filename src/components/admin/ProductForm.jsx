@@ -50,6 +50,43 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
         onSave(formData);
     };
 
+    const handleExtractData = async () => {
+        if (!productUrl) {
+            alert('الرجاء إدخال رابط المنتج');
+            return;
+        }
+
+        setIsExtracting(true);
+        try {
+            const response = await base44.functions.invoke('extractProductData', { productUrl });
+            
+            if (response.data.success) {
+                const extractedData = response.data.data;
+                setFormData(prev => ({
+                    ...prev,
+                    title: extractedData.title || prev.title,
+                    subtitle: extractedData.subtitle || prev.subtitle,
+                    price: extractedData.price || prev.price,
+                    oldPrice: extractedData.oldPrice || prev.oldPrice,
+                    rating: extractedData.rating || prev.rating,
+                    reviewsCount: extractedData.reviewsCount || prev.reviewsCount,
+                    images: extractedData.images || prev.images,
+                    marketplace: extractedData.marketplace || prev.marketplace,
+                    primeEligible: extractedData.primeEligible || prev.primeEligible,
+                    tags: extractedData.tags || prev.tags,
+                    affiliateUrl: response.data.affiliateUrl || prev.affiliateUrl,
+                }));
+                alert('تم استخراج البيانات بنجاح!');
+            } else {
+                alert('حدث خطأ أثناء استخراج البيانات');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('حدث خطأ أثناء استخراج البيانات');
+        }
+        setIsExtracting(false);
+    };
+
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
