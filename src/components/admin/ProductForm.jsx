@@ -89,6 +89,33 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Quick Extract Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg border-2 border-purple-200 dark:border-purple-700">
+                <Label className="text-lg font-bold mb-3 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    استخراج تلقائي - ضع رابط المنتج فقط
+                </Label>
+                <div className="flex gap-3">
+                    <Input 
+                        placeholder="https://www.amazon.com/dp/..." 
+                        value={productUrl}
+                        onChange={(e) => setProductUrl(e.target.value)}
+                        className="flex-1"
+                    />
+                    <Button 
+                        type="button" 
+                        onClick={handleExtractData}
+                        disabled={isExtracting}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    >
+                        {isExtracting ? 'جاري الاستخراج...' : 'استخراج البيانات'}
+                    </Button>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    سيتم استخراج العنوان، السعر، الصور، التقييم وجميع المعلومات تلقائياً
+                </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="name">Product Name</Label>
