@@ -2,42 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
-import { Sparkles } from 'lucide-react';
-
-const categories = ["electronics", "clothing", "home", "books", "sports", "beauty"];
+import { Sparkles, Loader2 } from 'lucide-react';
 
 export default function ProductForm({ product, onSave, onCancel, isSaving }) {
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState(null);
     const [productUrl, setProductUrl] = useState('');
     const [isExtracting, setIsExtracting] = useState(false);
 
     useEffect(() => {
         if (product) {
             setFormData(product);
-        } else {
-            setFormData({
-                name: '',
-                description: '',
-                price: 0,
-                category: 'electronics',
-                image_url: '',
-                stock: 0,
-                rating: 0,
-                featured: false,
-                affiliateUrl: '', // Changed from amazon_link
-                marketplace: '', // New field
-                isMysteryBoxCandidate: false, // New field
-            });
         }
     }, [product]);
 
@@ -62,21 +38,24 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
             
             if (response.data.success) {
                 const extractedData = response.data.data;
-                setFormData(prev => ({
-                    ...prev,
-                    title: extractedData.title || prev.title,
-                    subtitle: extractedData.subtitle || prev.subtitle,
-                    price: extractedData.price || prev.price,
-                    oldPrice: extractedData.oldPrice || prev.oldPrice,
-                    rating: extractedData.rating || prev.rating,
-                    reviewsCount: extractedData.reviewsCount || prev.reviewsCount,
-                    images: extractedData.images || prev.images,
-                    marketplace: extractedData.marketplace || prev.marketplace,
-                    primeEligible: extractedData.primeEligible || prev.primeEligible,
-                    tags: extractedData.tags || prev.tags,
-                    affiliateUrl: response.data.affiliateUrl || prev.affiliateUrl,
-                }));
-                alert('تم استخراج البيانات بنجاح!');
+                const slug = extractedData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || '';
+                
+                setFormData({
+                    title: extractedData.title || '',
+                    slug: slug,
+                    subtitle: extractedData.subtitle || '',
+                    price: extractedData.price || 0,
+                    oldPrice: extractedData.oldPrice || null,
+                    rating: extractedData.rating || 0,
+                    reviewsCount: extractedData.reviewsCount || 0,
+                    images: extractedData.images || [],
+                    marketplace: extractedData.marketplace || 'Amazon',
+                    primeEligible: extractedData.primeEligible || false,
+                    tags: extractedData.tags || [],
+                    affiliateUrl: response.data.affiliateUrl,
+                    isMysteryBoxCandidate: true,
+                    category_id: '',
+                });
             } else {
                 alert('حدث خطأ أثناء استخراج البيانات');
             }
@@ -88,105 +67,121 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Quick Extract Section */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg border-2 border-purple-200 dark:border-purple-700">
-                <Label className="text-lg font-bold mb-3 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
-                    استخراج تلقائي - ضع رابط المنتج فقط
-                </Label>
-                <div className="flex gap-3">
-                    <Input 
-                        placeholder="https://www.amazon.com/dp/..." 
-                        value={productUrl}
-                        onChange={(e) => setProductUrl(e.target.value)}
-                        className="flex-1"
-                    />
-                    <Button 
-                        type="button" 
-                        onClick={handleExtractData}
-                        disabled={isExtracting}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                    >
-                        {isExtracting ? 'جاري الاستخراج...' : 'استخراج البيانات'}
-                    </Button>
+        <div className="max-h-[80vh] overflow-y-auto">
+            {!formData ? (
+                // الخطوة 1: إدخال الرابط واستخراج البيانات
+                <div className="space-y-4 p-6">
+                    <div className="text-center mb-6">
+                        <Sparkles className="w-12 h-12 text-purple-600 mx-auto mb-3" />
+                        <h3 className="text-2xl font-bold mb-2">أضف منتج جديد</h3>
+                        <p className="text-gray-600 dark:text-gray-400">ضع رابط المنتج وسنستخرج جميع المعلومات تلقائياً</p>
+                    </div>
+                    
+                    <div className="space-y-3">
+                        <Input 
+                            placeholder="https://www.amazon.com/dp/... أو https://www.ebay.com/itm/..." 
+                            value={productUrl}
+                            onChange={(e) => setProductUrl(e.target.value)}
+                            className="text-lg h-12"
+                        />
+                        <Button 
+                            type="button" 
+                            onClick={handleExtractData}
+                            disabled={isExtracting}
+                            className="w-full h-12 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                        >
+                            {isExtracting ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                    جاري استخراج البيانات...
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="w-5 h-5 mr-2" />
+                                    استخراج البيانات
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                    
+                    <div className="flex justify-end pt-4">
+                        <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+                    </div>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    سيتم استخراج العنوان، السعر، الصور، التقييم وجميع المعلومات تلقائياً
-                </p>
-            </div>
+            ) : (
+                // الخطوة 2: مراجعة البيانات المستخرجة
+                <form onSubmit={handleSubmit} className="space-y-4 p-6">
+                    <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700 mb-4">
+                        <p className="text-green-800 dark:text-green-200 font-semibold">✓ تم استخراج البيانات بنجاح - راجع المعلومات وانقر حفظ</p>
+                    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="name">Product Name</Label>
-                    <Input id="name" value={formData.name || ''} onChange={e => handleChange('name', e.target.value)} required />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="price">Price</Label>
-                    <Input id="price" type="number" step="0.01" value={formData.price || 0} onChange={e => handleChange('price', parseFloat(e.target.value))} required />
-                </div>
-            </div>
-            
-            <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" value={formData.description || ''} onChange={e => handleChange('description', e.target.value)} />
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="image_url">Image URL</Label>
-                <Input id="image_url" value={formData.image_url || ''} onChange={e => handleChange('image_url', e.target.value)} placeholder="https://images.unsplash.com/..." />
-            </div>
-            
-            <div className="space-y-2">
-                <Label htmlFor="affiliateUrl">Affiliate Link (Optional)</Label>
-                <Input id="affiliateUrl" value={formData.affiliateUrl || ''} onChange={e => handleChange('affiliateUrl', e.target.value)} placeholder="https://www.amazon.com/dp/..." />
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="marketplace">Marketplace (e.g., Amazon, eBay)</Label>
-                <Input id="marketplace" value={formData.marketplace || ''} onChange={e => handleChange('marketplace', e.target.value)} placeholder="Amazon, eBay, Etsy..." />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Select value={formData.category || 'electronics'} onValueChange={value => handleChange('category', value)}>
-                        <SelectTrigger id="category">
-                            <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {categories.map(cat => (
-                                <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                    {/* الصور */}
+                    {formData.images && formData.images.length > 0 && (
+                        <div className="flex gap-2 overflow-x-auto pb-2">
+                            {formData.images.slice(0, 4).map((img, i) => (
+                                <img key={i} src={img} alt="" className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200" />
                             ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="stock">Stock</Label>
-                    <Input id="stock" type="number" value={formData.stock || 0} onChange={e => handleChange('stock', parseInt(e.target.value, 10))} />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="rating">Rating</Label>
-                    <Input id="rating" type="number" step="0.1" min="0" max="5" value={formData.rating || 0} onChange={e => handleChange('rating', parseFloat(e.target.value))} />
-                </div>
-            </div>
+                        </div>
+                    )}
 
-            <div className="flex items-center space-x-2 pt-2">
-                <Switch id="featured" checked={formData.featured || false} onCheckedChange={checked => handleChange('featured', checked)} />
-                <Label htmlFor="featured">Featured Product</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2 pt-2">
-                <Switch id="isMysteryBoxCandidate" checked={formData.isMysteryBoxCandidate || false} onCheckedChange={checked => handleChange('isMysteryBoxCandidate', checked)} />
-                <Label htmlFor="isMysteryBoxCandidate">Mystery Box Candidate / Quirky Find</Label>
-            </div>
-            
-            <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-                <Button type="submit" disabled={isSaving}>
-                    {isSaving ? 'Saving...' : 'Save Product'}
-                </Button>
-            </div>
-        </form>
+                    {/* المعلومات الأساسية */}
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <Label className="text-xs text-gray-500">العنوان</Label>
+                            <p className="font-semibold">{formData.title}</p>
+                        </div>
+                        <div>
+                            <Label className="text-xs text-gray-500">السعر</Label>
+                            <p className="font-semibold text-purple-600">${formData.price}</p>
+                        </div>
+                        <div>
+                            <Label className="text-xs text-gray-500">التقييم</Label>
+                            <p className="font-semibold">⭐ {formData.rating} ({formData.reviewsCount} مراجعة)</p>
+                        </div>
+                        <div>
+                            <Label className="text-xs text-gray-500">المتجر</Label>
+                            <p className="font-semibold">{formData.marketplace}</p>
+                        </div>
+                    </div>
+
+                    {formData.subtitle && (
+                        <div>
+                            <Label className="text-xs text-gray-500">الوصف</Label>
+                            <p className="text-sm">{formData.subtitle}</p>
+                        </div>
+                    )}
+
+                    {formData.tags && formData.tags.length > 0 && (
+                        <div>
+                            <Label className="text-xs text-gray-500 mb-2 block">الوسوم</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {formData.tags.map((tag, i) => (
+                                    <span key={i} className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 rounded text-xs">
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2 pt-2">
+                        <Switch 
+                            id="isMysteryBoxCandidate" 
+                            checked={formData.isMysteryBoxCandidate || false} 
+                            onCheckedChange={checked => handleChange('isMysteryBoxCandidate', checked)} 
+                        />
+                        <Label htmlFor="isMysteryBoxCandidate" className="text-sm">إضافة إلى Quirky Finds</Label>
+                    </div>
+                    
+                    <div className="flex justify-end gap-3 pt-4 border-t">
+                        <Button type="button" variant="outline" onClick={() => setFormData(null)}>تعديل الرابط</Button>
+                        <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+                        <Button type="submit" disabled={isSaving} className="bg-gradient-to-r from-purple-600 to-pink-600">
+                            {isSaving ? 'جاري الحفظ...' : 'حفظ المنتج'}
+                        </Button>
+                    </div>
+                </form>
+            )}
+        </div>
     );
 }
