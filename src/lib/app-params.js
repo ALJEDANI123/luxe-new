@@ -39,7 +39,13 @@ const getAppParams = () => {
 		storage.removeItem('base44_access_token');
 		storage.removeItem('token');
 	}
-	const resolvedAppId = getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID });
+	let resolvedAppId = getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID });
+
+    // Defensive check: if the resolvedAppId still contains the prefix, strip it.
+    if (resolvedAppId && typeof resolvedAppId === 'string' && resolvedAppId.startsWith('VITE_BASE44_APP_ID=')) {
+        resolvedAppId = resolvedAppId.split('=')[1];
+    }
+
 	console.log("Resolved App ID:", resolvedAppId); // Added for debugging
 	return {
 		appId: resolvedAppId,
