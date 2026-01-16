@@ -11,11 +11,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { base44 } from '@/api/base44Client';
+import { Sparkles } from 'lucide-react';
 
 const categories = ["electronics", "clothing", "home", "books", "sports", "beauty"];
 
 export default function ProductForm({ product, onSave, onCancel, isSaving }) {
     const [formData, setFormData] = useState({});
+    const [productUrl, setProductUrl] = useState('');
+    const [isExtracting, setIsExtracting] = useState(false);
 
     useEffect(() => {
         if (product) {
