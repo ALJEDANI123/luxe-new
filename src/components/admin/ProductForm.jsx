@@ -30,7 +30,9 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
                 stock: 0,
                 rating: 0,
                 featured: false,
-                amazon_link: '',
+                affiliateUrl: '', // Changed from amazon_link
+                marketplace: '', // New field
+                isMysteryBoxCandidate: false, // New field
             });
         }
     }, [product]);
@@ -68,8 +70,13 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
             </div>
             
             <div className="space-y-2">
-                <Label htmlFor="amazon_link">Amazon Link (Optional)</Label>
-                <Input id="amazon_link" value={formData.amazon_link || ''} onChange={e => handleChange('amazon_link', e.target.value)} placeholder="https://www.amazon.com/dp/..." />
+                <Label htmlFor="affiliateUrl">Affiliate Link (Optional)</Label>
+                <Input id="affiliateUrl" value={formData.affiliateUrl || ''} onChange={e => handleChange('affiliateUrl', e.target.value)} placeholder="https://www.amazon.com/dp/..." />
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="marketplace">Marketplace (e.g., Amazon, eBay)</Label>
+                <Input id="marketplace" value={formData.marketplace || ''} onChange={e => handleChange('marketplace', e.target.value)} placeholder="Amazon, eBay, Etsy..." />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -99,6 +106,11 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
             <div className="flex items-center space-x-2 pt-2">
                 <Switch id="featured" checked={formData.featured || false} onCheckedChange={checked => handleChange('featured', checked)} />
                 <Label htmlFor="featured">Featured Product</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2 pt-2">
+                <Switch id="isMysteryBoxCandidate" checked={formData.isMysteryBoxCandidate || false} onCheckedChange={checked => handleChange('isMysteryBoxCandidate', checked)} />
+                <Label htmlFor="isMysteryBoxCandidate">Mystery Box Candidate / Quirky Find</Label>
             </div>
             
             <div className="flex justify-end gap-3 pt-4">

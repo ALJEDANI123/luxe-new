@@ -227,13 +227,13 @@ export default function ProductPage() {
 
                         <Separator />
 
-                        {/* Quantity and Add to Cart */}
+                        {/* Quantity and Add to Cart / View on Affiliate */}
                         <div className="space-y-4">
-                            {product.amazon_link ? (
-                                <a href={product.amazon_link} target="_blank" rel="noopener noreferrer" className="w-full block">
+                            {product.affiliateUrl ? ( // Check for affiliateUrl
+                                <a href={product.affiliateUrl} target="_blank" rel="noopener noreferrer" className="w-full block">
                                     <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black h-12 gap-2">
                                         <ExternalLink className="w-4 h-4" />
-                                        View on Amazon
+                                        View on {product.marketplace || 'External Site'} {/* Use marketplace or default */}
                                     </Button>
                                 </a>
                             ) : (
