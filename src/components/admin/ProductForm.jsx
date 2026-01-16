@@ -59,7 +59,15 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
                     category_id: '',
                 });
                 
-                alert(`تم استخراج: ${extractedData.title}, السعر: $${extractedData.price}, التقييم: ${extractedData.rating}`);
+                // عرض جميع البيانات المستخرجة للتأكد
+                console.log('===== البيانات المستخرجة الكاملة =====');
+                console.log('العنوان:', extractedData.title);
+                console.log('الوصف:', extractedData.subtitle);
+                console.log('السعر:', extractedData.price);
+                console.log('التقييم:', extractedData.rating);
+                console.log('عدد المراجعات:', extractedData.reviewsCount);
+                console.log('الصور:', extractedData.images);
+                console.log('===============================');
             } else {
                 alert('حدث خطأ أثناء استخراج البيانات');
             }

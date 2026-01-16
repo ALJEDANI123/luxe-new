@@ -20,21 +20,28 @@ Deno.serve(async (req) => {
         }
 
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract product information from this URL: ${productUrl}
-            
-Please extract all available information including:
-- Product title
-- Subtitle or short description
-- Price (as a number without currency symbol)
-- Old/original price if there's a discount
-- Rating (as a number from 0 to 5)
-- Number of reviews/ratings
-- Main product images (array of URLs)
-- Marketplace name (Amazon, eBay, etc.)
-- Whether it's Prime eligible (for Amazon)
-- Product tags or categories
+            prompt: `You are a product data extractor. Extract detailed product information from this URL: ${productUrl}
 
-Return the data in JSON format.`,
+CRITICAL INSTRUCTIONS:
+1. Find the ACTUAL rating (stars) - look for something like "4.5 out of 5 stars" or "4.5★"
+2. Find the ACTUAL number of reviews/ratings - look for numbers like "12,345 ratings" or "1,234 reviews"
+3. Find the ACTUAL product description or subtitle - NOT just tags
+4. Extract the ACTUAL price as a number (without $ or currency symbols)
+5. Get REAL product image URLs from the page
+
+Extract:
+- title: Full product name
+- subtitle: Product description or subtitle (NOT just tags, get the actual description text)
+- price: Current price as number (e.g., 15.99 not "$15.99")
+- oldPrice: Original price if on sale (as number)
+- rating: Star rating as decimal number 0-5 (e.g., 4.7)
+- reviewsCount: Total number of customer reviews/ratings as integer (e.g., 15234)
+- images: Array of actual product image URLs
+- marketplace: Store name (Amazon, eBay, Etsy, etc.)
+- primeEligible: true if Amazon Prime available
+- tags: Product categories/tags as array
+
+IMPORTANT: Return REAL data from the actual product page, not placeholder values. If you can't find a field, set it to null.`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -42,7 +49,7 @@ Return the data in JSON format.`,
                     title: { type: "string" },
                     subtitle: { type: "string" },
                     price: { type: "number" },
-                    oldPrice: { type: "number" },
+                    oldPrice: { type: ["number", "null"] },
                     rating: { type: "number" },
                     reviewsCount: { type: "number" },
                     images: { 
