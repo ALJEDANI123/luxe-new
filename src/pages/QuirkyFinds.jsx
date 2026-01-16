@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '../api/base44Client';
-import { Sparkles } from 'lucide-react';
-
+import { Sparkles, PlusCircle } from 'lucide-react';
+import { Button } from '../components/ui/button';
 import ProductCard from '../components/ProductCard';
+import { useAuth } from '@/lib/AuthContext'; // Import useAuth hook
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
+import { createPageUrl } from '../utils'; // Import createPageUrl
 
 export default function QuirkyFinds() {
     const [products, setProducts] = useState([]);
     const [userFavorites, setUserFavorites] = useState([]);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { user: authUser } = useAuth(); // Get authenticated user from AuthContext
+    const navigate = useNavigate();
 
     useEffect(() => {
         loadData();
@@ -29,6 +34,10 @@ export default function QuirkyFinds() {
             // User not logged in
         }
         setIsLoading(false);
+    };
+
+    const handleAddNewQuirkyFind = () => {
+        navigate(createPageUrl('Admin')); // Navigate to the Admin page
     };
 
     return (
@@ -61,11 +70,24 @@ export default function QuirkyFinds() {
                 </motion.p>
             </div>
 
+            {/* Add New Quirky Find Button (Admin Only) */}
+            {authUser && authUser.role === 'admin' && (
+                <div className="text-center mb-12">
+                    <Button 
+                        onClick={handleAddNewQuirkyFind}
+                        className="bg-gradient-to-r from-[var(--color-teal)] to-[var(--color-blue)] hover:from-[var(--color-teal)] hover:to-[var(--color-blue)] text-white font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                        <PlusCircle className="w-5 h-5 mr-2" />
+                        أضف منتجًا غريبًا جديدًا
+                    </Button>
+                </div>
+            )}
+
             {/* Products Grid */}
             {isLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {[...Array(8)].map((_, i) => (
-                        <div key={i} className="bg-gray-200 dark:bg-gray-700 rounded-2xl h-80 animate-pulse"></div>
+                        <div key={i} className="bg-gray-200 dark:bg-gray-700 rounded-2xl h-96 animate-pulse"></div>
                     ))}
                 </div>
             ) : (
