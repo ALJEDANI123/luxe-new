@@ -174,7 +174,7 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
                             <textarea 
                                 value={formData.subtitle || ''} 
                                 onChange={(e) => handleChange('subtitle', e.target.value)}
-                                className="w-full mt-1 p-3 border rounded-md min-h-[120px] text-sm leading-relaxed resize-y"
+                                className="w-full mt-1 p-3 border rounded-md min-h-[200px] text-sm leading-relaxed resize-y"
                                 placeholder="وصف المنتج..."
                             />
                         </div>
