@@ -9,6 +9,7 @@ import { formatPrice, getFallbackImage } from '@/components/utils/helpers';
 export default function ProductCard({ product, onFavoriteChange, userFavorites, user }) {
     const [isFavorite, setIsFavorite] = useState(false);
     const [favoriteId, setFavoriteId] = useState(null);
+    const [favoritesCount, setFavoritesCount] = useState(0);
 
     useEffect(() => {
         if (userFavorites) {
@@ -21,6 +22,11 @@ export default function ProductCard({ product, onFavoriteChange, userFavorites, 
                 setFavoriteId(null);
             }
         }
+        
+        // Get favorites count for this product
+        base44.entities.Favorite.filter({ product_id: product.id })
+            .then(favorites => setFavoritesCount(favorites.length))
+            .catch(() => setFavoritesCount(0));
     }, [userFavorites, product.id]);
 
     const toggleFavorite = async (e) => {
@@ -77,20 +83,27 @@ export default function ProductCard({ product, onFavoriteChange, userFavorites, 
                         onLoad={() => setImageLoaded(true)}
                     />
                 </a>
-                <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="absolute top-2 right-2 bg-white/90 hover:bg-white rounded-full shadow-lg"
-                    onClick={toggleFavorite}
-                >
-                    <Heart 
-                        className={`w-5 h-5 transition-all ${
-                            isFavorite 
-                                ? 'fill-pink-500 text-pink-500' 
-                                : 'text-gray-500 hover:text-pink-500'
-                        }`} 
-                    />
-                </Button>
+                <div className="absolute top-2 right-2 flex flex-col items-center gap-1">
+                    <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="bg-white/90 hover:bg-white rounded-full shadow-lg group hover:shadow-pink-300 hover:shadow-2xl transition-all duration-300"
+                        onClick={toggleFavorite}
+                    >
+                        <Heart 
+                            className={`w-5 h-5 transition-all duration-300 ${
+                                isFavorite 
+                                    ? 'fill-pink-500 text-pink-500 drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]' 
+                                    : 'text-gray-500 group-hover:text-pink-500 group-hover:scale-110 group-hover:drop-shadow-[0_0_12px_rgba(236,72,153,0.8)]'
+                            }`} 
+                        />
+                    </Button>
+                    {favoritesCount > 0 && (
+                        <span className="text-xs font-bold text-gray-700 bg-white/90 px-2 py-0.5 rounded-full shadow">
+                            {favoritesCount}
+                        </span>
+                    )}
+                </div>
             </div>
             <div className="p-4 flex flex-col flex-grow">
                 <h3 className="font-bold text-lg line-clamp-2 h-14">{product.title}</h3>

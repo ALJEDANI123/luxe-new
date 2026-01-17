@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { base44 } from '@/api/base44Client';
 import { Sparkles, Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function ProductForm({ product, onSave, onCancel, isSaving }) {
     const [formData, setFormData] = useState(null);
@@ -140,7 +141,11 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
                     <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-3">
                         <div>
                             <Label className="text-xs text-gray-500 font-bold">العنوان</Label>
-                            <p className="font-semibold text-base mt-1">{formData.title || 'غير متوفر'}</p>
+                            <Input 
+                                value={formData.title || ''} 
+                                onChange={(e) => handleChange('title', e.target.value)}
+                                className="mt-1"
+                            />
                         </div>
                         
                         <div className="grid grid-cols-2 gap-3">
@@ -164,12 +169,15 @@ export default function ProductForm({ product, onSave, onCancel, isSaving }) {
                             </p>
                         </div>
                         
-                        {formData.subtitle && (
-                            <div>
-                                <Label className="text-xs text-gray-500 font-bold">الوصف</Label>
-                                <p className="text-sm mt-1 leading-relaxed">{formData.subtitle}</p>
-                            </div>
-                        )}
+                        <div>
+                            <Label className="text-xs text-gray-500 font-bold">الوصف</Label>
+                            <textarea 
+                                value={formData.subtitle || ''} 
+                                onChange={(e) => handleChange('subtitle', e.target.value)}
+                                className="w-full mt-1 p-3 border rounded-md min-h-[120px] text-sm leading-relaxed resize-y"
+                                placeholder="وصف المنتج..."
+                            />
+                        </div>
                     </div>
 
                     {formData.tags && formData.tags.length > 0 && (
