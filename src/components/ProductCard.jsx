@@ -107,7 +107,7 @@ export default function ProductCard({ product, onFavoriteChange, userFavorites, 
             </div>
             <div className="p-4 flex flex-col flex-grow">
                 <h3 className="font-bold text-lg line-clamp-2 h-14">{product.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mb-2">{product.subtitle}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mb-2 leading-relaxed">{product.subtitle}</p>
                 
                 <div className="flex items-center gap-2 text-sm mb-2">
                     <div className="flex items-center text-yellow-500">
