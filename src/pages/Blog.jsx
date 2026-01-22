@@ -50,7 +50,7 @@ export default function Blog() {
                     <BookOpen className="w-10 h-10 text-white" />
                 </motion.div>
                 <motion.h1 
-                    className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-[var(--color-pink)] via-[var(--color-orange)] to-[var(--color-purple)] bg-clip-text text-transparent leading-tight pb-2"
+                    className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-[var(--color-purple)] via-[var(--color-pink)] to-[var(--color-orange)] bg-clip-text text-transparent leading-tight pb-2"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}

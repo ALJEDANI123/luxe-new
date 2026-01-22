@@ -28,7 +28,7 @@ export default function CategoriesPage() {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <h1 className="text-5xl font-black text-center mb-4 bg-gradient-to-r from-[var(--color-blue)] via-[var(--color-purple)] to-[var(--color-pink)] bg-clip-text text-transparent leading-tight pb-2">Categories</h1>
+            <h1 className="text-5xl md:text-6xl font-black text-center mb-4 bg-gradient-to-r from-[var(--color-teal)] via-[var(--color-blue)] to-[var(--color-purple)] bg-clip-text text-transparent leading-tight pb-2">Categories</h1>
             <p className="text-xl text-center text-dark/70 dark:text-off-white/70 mb-12">Find your next favorite weird thing!</p>
 
             <div className="flex flex-wrap justify-center gap-4 mb-12">

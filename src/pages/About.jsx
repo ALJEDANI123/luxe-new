@@ -28,7 +28,7 @@ export default function About() {
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
                     />
-                    <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-[var(--color-teal)] via-[var(--color-pink)] to-[var(--color-orange)] bg-clip-text text-transparent leading-tight pb-2">
+                    <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-[var(--color-purple)] via-[var(--color-pink)] to-[var(--color-orange)] bg-clip-text text-transparent leading-tight pb-2">
                         About BagiLand
                     </h1>
                     <p className="text-xl md:text-2xl font-bold text-gray-700 dark:text-gray-200">
