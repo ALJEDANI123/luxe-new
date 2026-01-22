@@ -23,37 +23,27 @@ Deno.serve(async (req) => {
         const pageResponse = await fetch(productUrl);
         const html = await pageResponse.text();
         
-        // Extract images from HTML using regex
+        // Extract images from HTML
         const images = [];
         
-        // Look for og:image meta tags
-        const ogImageRegex = /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/gi;
-        let match;
-        while ((match = ogImageRegex.exec(html)) !== null) {
-            images.push(match[1]);
-        }
+        // Extract all image URLs from various patterns
+        const imagePatterns = [
+            /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/gi,
+            /<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/gi,
+            /https:\/\/i\.etsystatic\.com\/[^\s"'<>)]+\.jpg/gi,
+            /https:\/\/i\.etsystatic\.com\/[^\s"'<>)]+\.jpeg/gi,
+            /https:\/\/i\.etsystatic\.com\/[^\s"'<>)]+\.png/gi,
+            /https:\/\/m\.media-amazon\.com\/images\/I\/[^\s"'<>)]+/gi,
+            /https:\/\/i\.ebayimg\.com\/[^\s"'<>)]+/gi,
+        ];
         
-        // Look for Etsy product images
-        const etsyImageRegex = /https:\/\/i\.etsystatic\.com\/[^\s"'<>]+/gi;
-        while ((match = etsyImageRegex.exec(html)) !== null) {
-            if (!images.includes(match[0])) {
-                images.push(match[0]);
-            }
-        }
-        
-        // Look for Amazon product images
-        const amazonImageRegex = /https:\/\/m\.media-amazon\.com\/images\/I\/[^\s"'<>]+/gi;
-        while ((match = amazonImageRegex.exec(html)) !== null) {
-            if (!images.includes(match[0])) {
-                images.push(match[0]);
-            }
-        }
-        
-        // Look for eBay images
-        const ebayImageRegex = /https:\/\/i\.ebayimg\.com\/[^\s"'<>]+/gi;
-        while ((match = ebayImageRegex.exec(html)) !== null) {
-            if (!images.includes(match[0])) {
-                images.push(match[0]);
+        for (const pattern of imagePatterns) {
+            let match;
+            while ((match = pattern.exec(html)) !== null) {
+                const imageUrl = match[1] || match[0];
+                if (imageUrl && !images.includes(imageUrl) && imageUrl.startsWith('http')) {
+                    images.push(imageUrl);
+                }
             }
         }
         
