@@ -64,7 +64,7 @@ export default function QuirkyFinds() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                 >
-                    اكتشف مجموعتنا المميزة من المنتجات الغريبة والمرحة من مختلف المتاجر العالمية
+                    Discover our curated collection of weird, wonderful, and wildly unique products from around the web
                 </motion.p>
             </div>
 
@@ -81,7 +81,7 @@ export default function QuirkyFinds() {
                         className="bg-gradient-to-r from-[var(--color-teal)] to-[var(--color-blue)] hover:from-[var(--color-teal)] hover:to-[var(--color-blue)] text-white font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                         <PlusCircle className="w-5 h-5 mr-2" />
-                        أضف منتجًا غريبًا جديدًا
+                        Add New Quirky Find
                     </Button>
                 </motion.div>
             )}
@@ -110,7 +110,7 @@ export default function QuirkyFinds() {
 
             {!isLoading && products.length === 0 && (
                 <div className="text-center py-16">
-                    <p className="text-2xl text-gray-500">لا توجد منتجات حالياً</p>
+                    <p className="text-2xl text-gray-500">No products available at the moment</p>
                 </div>
             )}
         </div>

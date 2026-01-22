@@ -22,9 +22,8 @@ function LayoutContent({ children }) {
 
     const navItems = [
                 { title: 'Home', href: createPageUrl('Home') },
-                { title: 'Quirky Finds', href: createPageUrl('QuirkyFinds') },
                 { title: 'Categories', href: createPageUrl('Categories') },
-                { title: 'eBay Deals', href: createPageUrl('EbayDeals') },
+                { title: 'Quirky Finds', href: createPageUrl('QuirkyFinds') },
                 { title: 'Mystery Box', href: createPageUrl('MysteryBox') },
                 { title: 'Blog', href: createPageUrl('Blog') },
                 { title: 'About', href: createPageUrl('About') },
