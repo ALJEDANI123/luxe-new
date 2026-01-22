@@ -27,16 +27,28 @@ Deno.serve(async (req) => {
         
         // For Etsy
         if (productUrl.includes('etsy.com')) {
-            // Search for all il_794xN image patterns
-            const allMatches = pageHtml.match(/i\.etsystatic\.com[^\s"'<>)]+il_794xN[^\s"'<>)]+\.jpg/gi);
-            if (allMatches) {
-                extractedImages = allMatches.map(url => {
-                    // Ensure https://
-                    return url.startsWith('http') ? url : `https://${url}`;
-                });
-                // Remove duplicates
-                extractedImages = [...new Set(extractedImages)];
-            }
+            // Write HTML to file for debugging
+            await Deno.writeTextFile('/tmp/etsy_page.html', pageHtml);
+            console.log('HTML saved to /tmp/etsy_page.html');
+            console.log('HTML length:', pageHtml.length);
+            console.log('Sample HTML:', pageHtml.substring(0, 1000));
+            
+            // Try multiple patterns
+            const pattern1 = pageHtml.match(/https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_794xN\.\d+_[a-z0-9]+\.jpg/gi);
+            const pattern2 = pageHtml.match(/"(https:\/\/i\.etsystatic\.com[^"]+il_794xN[^"]+\.jpg)"/gi);
+            const pattern3 = pageHtml.match(/i\.etsystatic\.com[^\s"']+il_794xN[^\s"']+\.jpg/gi);
+            
+            console.log('Pattern 1 matches:', pattern1?.length || 0);
+            console.log('Pattern 2 matches:', pattern2?.length || 0);
+            console.log('Pattern 3 matches:', pattern3?.length || 0);
+            
+            if (pattern1) extractedImages.push(...pattern1);
+            if (pattern2) extractedImages.push(...pattern2.map(s => s.replace(/"/g, '')));
+            if (pattern3) extractedImages.push(...pattern3.map(url => url.startsWith('http') ? url : `https://${url}`));
+            
+            // Remove duplicates
+            extractedImages = [...new Set(extractedImages)];
+            console.log('Total extracted images:', extractedImages.length);
         }
         
         // For Amazon: Look for Amazon image URLs
