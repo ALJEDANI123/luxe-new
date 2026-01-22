@@ -23,22 +23,55 @@ Deno.serve(async (req) => {
         const pageResponse = await fetch(productUrl);
         const html = await pageResponse.text();
         
-        // Use LLM to extract all data including actual image URLs from the HTML
+        // Extract images from HTML using regex
+        const images = [];
+        
+        // Look for og:image meta tags
+        const ogImageRegex = /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/gi;
+        let match;
+        while ((match = ogImageRegex.exec(html)) !== null) {
+            images.push(match[1]);
+        }
+        
+        // Look for Etsy product images
+        const etsyImageRegex = /https:\/\/i\.etsystatic\.com\/[^\s"'<>]+/gi;
+        while ((match = etsyImageRegex.exec(html)) !== null) {
+            if (!images.includes(match[0])) {
+                images.push(match[0]);
+            }
+        }
+        
+        // Look for Amazon product images
+        const amazonImageRegex = /https:\/\/m\.media-amazon\.com\/images\/I\/[^\s"'<>]+/gi;
+        while ((match = amazonImageRegex.exec(html)) !== null) {
+            if (!images.includes(match[0])) {
+                images.push(match[0]);
+            }
+        }
+        
+        // Look for eBay images
+        const ebayImageRegex = /https:\/\/i\.ebayimg\.com\/[^\s"'<>]+/gi;
+        while ((match = ebayImageRegex.exec(html)) !== null) {
+            if (!images.includes(match[0])) {
+                images.push(match[0]);
+            }
+        }
+        
+        // Use LLM to extract product data (without images)
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `From this product page HTML, extract:
+            prompt: `Extract product information from: ${productUrl}
+
+Return:
 - title: Product name
 - subtitle: Product description (150-200 characters)
 - price: Number only
 - oldPrice: If on sale, otherwise null
 - rating: 0-5 stars
 - reviewsCount: Number of reviews
-- marketplace: Detect if Etsy, Amazon, or eBay
+- marketplace: Etsy, Amazon, or eBay
 - primeEligible: true only if Amazon Prime
-- tags: 5-8 relevant keywords
-- images: Extract ALL actual image URLs from the page (look for og:image, product images, gallery images - get at least 3-5 real image URLs)
-
-HTML content:
-${html.slice(0, 50000)}`,
+- tags: 5-8 relevant keywords`,
+            add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
                 properties: {
@@ -50,11 +83,13 @@ ${html.slice(0, 50000)}`,
                     reviewsCount: { type: "number" },
                     marketplace: { type: "string" },
                     primeEligible: { type: "boolean" },
-                    tags: { type: "array", items: { type: "string" } },
-                    images: { type: "array", items: { type: "string" } }
+                    tags: { type: "array", items: { type: "string" } }
                 }
             }
         });
+        
+        // Add extracted images to result
+        result.images = images.slice(0, 5);
 
         return Response.json({ 
             success: true,
