@@ -27,41 +27,42 @@ Deno.serve(async (req) => {
         });
         const pageHtml = await pageResponse.text();
         
+        // Extract images directly from HTML using regex
+        let extractedImages = [];
+        
+        // For Etsy: Look for il_794xN images (high resolution)
+        if (productUrl.includes('etsy.com')) {
+            const etsyImageRegex = /https:\/\/i\.etsystatic\.com\/[^"'\s]+il_794xN[^"'\s]+\.jpg/g;
+            const matches = pageHtml.match(etsyImageRegex);
+            if (matches) {
+                extractedImages = [...new Set(matches)]; // Remove duplicates
+            }
+        }
+        
+        // For Amazon: Look for Amazon image URLs
+        if (productUrl.includes('amazon.com')) {
+            const amazonImageRegex = /https:\/\/(images-na\.ssl-images-amazon\.com|m\.media-amazon\.com)\/images\/[^"'\s]+\._[^"'\s]+\.jpg/g;
+            const matches = pageHtml.match(amazonImageRegex);
+            if (matches) {
+                extractedImages = [...new Set(matches)];
+            }
+        }
+        
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract product data from this HTML page content. This is the actual HTML from ${productUrl}
+            prompt: `Extract product information from this product page URL: ${productUrl}
 
-HTML Content (first 100k chars):
-${pageHtml.substring(0, 100000)}
+Visit the page and extract:
+- title: Product name
+- subtitle: Product description (150-200 characters)
+- price: Number only (e.g., 26.46)
+- oldPrice: If on sale
+- rating: 0-5 stars
+- reviewsCount: Number of reviews
+- marketplace: Etsy, Amazon, or eBay
+- tags: Array of relevant tags
 
-CRITICAL EXTRACTION RULES:
-
-1. TITLE: Extract from <title> tag or h1 heading
-2. PRICE: Look for "$" or "Price:" in the HTML, extract numbers only (e.g., 26.46 not $26.46)
-3. RATING: Look for "5 out of 5 stars" or similar patterns
-4. IMAGES: MOST IMPORTANT - Extract ALL image URLs:
-   - For Etsy: Find ALL URLs containing "i.etsystatic.com" and "il_794xN" (high-res images)
-   - Example: https://i.etsystatic.com/28790764/r/il/907249/7246871711/il_794xN.7246871711_d0uz.jpg
-   - Extract minimum 5-8 images if available
-   - Return COMPLETE URLs starting with https://
-5. DESCRIPTION: Extract product description from the page
-6. MARKETPLACE: Determine from URL (Etsy, Amazon, eBay)
-
-Return JSON with:
-{
-  "title": "exact product title",
-  "subtitle": "product description",
-  "price": 26.46,
-  "oldPrice": null,
-  "rating": 5,
-  "reviewsCount": 0,
-  "images": ["https://i.etsystatic.com/...il_794xN...jpg", ...],
-  "marketplace": "Etsy",
-  "primeEligible": false,
-  "tags": ["tag1", "tag2"]
-}
-
-CRITICAL: The images array must contain REAL working URLs from i.etsystatic.com domain for Etsy products!`,
-            add_context_from_internet: false,
+Return ONLY the data, do NOT include images array as I will add it separately.`,
+            add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
                 properties: {
