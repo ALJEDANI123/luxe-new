@@ -19,48 +19,23 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Fetch the actual product page HTML
-        const pageResponse = await fetch(productUrl);
-        const html = await pageResponse.text();
-        
-        // Extract images from HTML
-        const images = [];
-        
-        // Extract all image URLs from various patterns
-        const imagePatterns = [
-            /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/gi,
-            /<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/gi,
-            /https:\/\/i\.etsystatic\.com\/[^\s"'<>)]+\.jpg/gi,
-            /https:\/\/i\.etsystatic\.com\/[^\s"'<>)]+\.jpeg/gi,
-            /https:\/\/i\.etsystatic\.com\/[^\s"'<>)]+\.png/gi,
-            /https:\/\/m\.media-amazon\.com\/images\/I\/[^\s"'<>)]+/gi,
-            /https:\/\/i\.ebayimg\.com\/[^\s"'<>)]+/gi,
-        ];
-        
-        for (const pattern of imagePatterns) {
-            let match;
-            while ((match = pattern.exec(html)) !== null) {
-                const imageUrl = match[1] || match[0];
-                if (imageUrl && !images.includes(imageUrl) && imageUrl.startsWith('http')) {
-                    images.push(imageUrl);
-                }
-            }
-        }
-        
-        // Use LLM to extract product data (without images)
+        // Use LLM with web search to extract all product data including images
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract product information from: ${productUrl}
+            prompt: `Visit this product page and extract ALL information: ${productUrl}
 
-Return:
-- title: Product name
+CRITICAL: You MUST extract the actual product image URLs from the page.
+
+Return complete data:
+- title: Exact product name from the page
 - subtitle: Product description (150-200 characters)
-- price: Number only
-- oldPrice: If on sale, otherwise null
-- rating: 0-5 stars
-- reviewsCount: Number of reviews
-- marketplace: Etsy, Amazon, or eBay
-- primeEligible: true only if Amazon Prime
-- tags: 5-8 relevant keywords`,
+- price: Current price (number only)
+- oldPrice: Original price if on sale, otherwise null
+- rating: Star rating (0-5)
+- reviewsCount: Total number of reviews
+- marketplace: Identify if this is Etsy, Amazon, or eBay
+- primeEligible: true only if Amazon Prime badge exists
+- tags: Extract 5-8 relevant product tags/keywords
+- images: CRITICAL - Extract at least 3-5 actual image URLs from the product gallery on this page. These should be direct links to product photos.`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -73,13 +48,11 @@ Return:
                     reviewsCount: { type: "number" },
                     marketplace: { type: "string" },
                     primeEligible: { type: "boolean" },
-                    tags: { type: "array", items: { type: "string" } }
+                    tags: { type: "array", items: { type: "string" } },
+                    images: { type: "array", items: { type: "string" } }
                 }
             }
         });
-        
-        // Add extracted images to result
-        result.images = images.slice(0, 5);
 
         return Response.json({ 
             success: true,
