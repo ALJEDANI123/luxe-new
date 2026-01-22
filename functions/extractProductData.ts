@@ -19,11 +19,11 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Use LLM to extract product data
+        // Use LLM to extract product data AND images
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract product information from: ${productUrl}
+            prompt: `Extract ALL product information including images from: ${productUrl}
 
-Return:
+You MUST visit this URL and extract:
 - title: Product name
 - subtitle: Product description (150-200 characters)
 - price: Number only (e.g., 26.46)
@@ -32,7 +32,10 @@ Return:
 - reviewsCount: Number of reviews
 - marketplace: Etsy, Amazon, or eBay
 - primeEligible: false for non-Amazon
-- tags: Array of 5-8 relevant tags`,
+- tags: Array of 5-8 relevant tags
+- images: Array of product image URLs found on the page (at least 3-5 images)
+
+IMPORTANT: For images, look for actual image URLs on the product page. Extract the real image URLs from the HTML.`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -48,15 +51,14 @@ Return:
                     tags: {
                         type: "array",
                         items: { type: "string" }
+                    },
+                    images: {
+                        type: "array",
+                        items: { type: "string" }
                     }
                 }
             }
         });
-        
-        // Generate placeholder image using product title as seed
-        // This is a temporary solution - uses Unsplash for demo purposes
-        const titleWords = result.title.toLowerCase().split(' ').slice(0, 3).join('+');
-        result.images = [`https://source.unsplash.com/800x600/?${titleWords},product`];
 
         return Response.json({ 
             success: true,
