@@ -19,39 +19,7 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Fetch the actual page content
-        const pageResponse = await fetch(productUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-        });
-        const pageHtml = await pageResponse.text();
-        
-        // Extract images directly from HTML 
-        let extractedImages = [];
-        
-        // For Etsy: Extract images from the page
-        if (productUrl.includes('etsy.com')) {
-            // Look for images in markdown/alt tags first (these are the actual product images)
-            const imgRegex = /https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_794xN\.\d+_[a-z0-9]+\.jpg/gi;
-            const matches = pageHtml.match(imgRegex);
-            
-            if (matches && matches.length > 0) {
-                extractedImages = [...new Set(matches)].slice(0, 10);
-            }
-            
-            console.log('Etsy images found:', extractedImages.length);
-        }
-        
-        // For Amazon: Look for Amazon image URLs
-        if (productUrl.includes('amazon.com')) {
-            const amazonImageRegex = /https:\/\/(images-na\.ssl-images-amazon\.com|m\.media-amazon\.com)\/images\/[^"'\s]+\._[^"'\s]+\.jpg/g;
-            const matches = pageHtml.match(amazonImageRegex);
-            if (matches) {
-                extractedImages = [...new Set(matches)];
-            }
-        }
-        
+        // Use LLM to extract ALL data including images
         const result = await base44.integrations.Core.InvokeLLM({
             prompt: `Extract product information from this product page URL: ${productUrl}
 
@@ -64,8 +32,9 @@ Visit the page and extract:
 - reviewsCount: Number of reviews
 - marketplace: Etsy, Amazon, or eBay
 - tags: Array of relevant tags
+- images: Array of ACTUAL product image URLs (high resolution if available). For Etsy, look for URLs containing "il_794xN". Return up to 10 images. DO NOT return placeholder text - only actual direct image URLs starting with https://
 
-Return ONLY the data, do NOT include images array as I will add it separately.`,
+IMPORTANT: The images array must contain REAL image URLs, not placeholder text. Each URL should be a direct link to an image file.`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -81,13 +50,14 @@ Return ONLY the data, do NOT include images array as I will add it separately.`,
                     tags: {
                         type: "array",
                         items: { type: "string" }
+                    },
+                    images: {
+                        type: "array",
+                        items: { type: "string" }
                     }
                 }
             }
         });
-        
-        // Add the extracted images
-        result.images = extractedImages;
 
         return Response.json({ 
             success: true,
