@@ -30,27 +30,17 @@ Deno.serve(async (req) => {
         // Extract images directly from HTML 
         let extractedImages = [];
         
-        // For Etsy: Look for all high-resolution images (il_794xN)
+        // For Etsy: Extract images from the page
         if (productUrl.includes('etsy.com')) {
-            // Pattern to match Etsy high-res images in various contexts
-            const patterns = [
-                // In src attributes
-                /src="(https:\/\/i\.etsystatic\.com\/[^"]+\/il_794xN[^"]+\.jpg)"/g,
-                // In data attributes or JSON
-                /"(https:\/\/i\.etsystatic\.com\/[^"]+\/il_794xN[^"]+\.jpg)"/g,
-                // Without quotes (in JS)
-                /(https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_794xN\.\d+_[a-z0-9]+\.jpg)/g
-            ];
+            // Look for images in markdown/alt tags first (these are the actual product images)
+            const imgRegex = /https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_794xN\.\d+_[a-z0-9]+\.jpg/gi;
+            const matches = pageHtml.match(imgRegex);
             
-            for (const pattern of patterns) {
-                let match;
-                while ((match = pattern.exec(pageHtml)) !== null) {
-                    extractedImages.push(match[1]);
-                }
+            if (matches && matches.length > 0) {
+                extractedImages = [...new Set(matches)].slice(0, 10);
             }
             
-            // Remove duplicates and limit to first 10 images
-            extractedImages = [...new Set(extractedImages)].slice(0, 10);
+            console.log('Etsy images found:', extractedImages.length);
         }
         
         // For Amazon: Look for Amazon image URLs
