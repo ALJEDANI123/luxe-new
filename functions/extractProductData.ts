@@ -30,39 +30,27 @@ Deno.serve(async (req) => {
         // Extract images directly from HTML 
         let extractedImages = [];
         
-        // For Etsy: Extract images from JSON-LD structured data
+        // For Etsy: Look for all high-resolution images (il_794xN)
         if (productUrl.includes('etsy.com')) {
-            // Try to find JSON-LD structured data
-            const jsonLdMatch = pageHtml.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi);
-            if (jsonLdMatch) {
-                for (const jsonBlock of jsonLdMatch) {
-                    try {
-                        const jsonContent = jsonBlock.replace(/<script[^>]*>|<\/script>/gi, '');
-                        const data = JSON.parse(jsonContent);
-                        if (data.image) {
-                            if (Array.isArray(data.image)) {
-                                extractedImages.push(...data.image);
-                            } else if (typeof data.image === 'string') {
-                                extractedImages.push(data.image);
-                            }
-                        }
-                    } catch (e) {
-                        // Continue if JSON parse fails
-                    }
-                }
-            }
+            // Pattern to match Etsy high-res images in various contexts
+            const patterns = [
+                // In src attributes
+                /src="(https:\/\/i\.etsystatic\.com\/[^"]+\/il_794xN[^"]+\.jpg)"/g,
+                // In data attributes or JSON
+                /"(https:\/\/i\.etsystatic\.com\/[^"]+\/il_794xN[^"]+\.jpg)"/g,
+                // Without quotes (in JS)
+                /(https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_794xN\.\d+_[a-z0-9]+\.jpg)/g
+            ];
             
-            // Fallback: regex search for high-res images
-            if (extractedImages.length === 0) {
-                const imageRegex = /"(https:\/\/i\.etsystatic\.com\/[^"]+il_794xN[^"]+\.jpg)"/g;
+            for (const pattern of patterns) {
                 let match;
-                while ((match = imageRegex.exec(pageHtml)) !== null) {
+                while ((match = pattern.exec(pageHtml)) !== null) {
                     extractedImages.push(match[1]);
                 }
             }
             
-            // Remove duplicates
-            extractedImages = [...new Set(extractedImages)];
+            // Remove duplicates and limit to first 10 images
+            extractedImages = [...new Set(extractedImages)].slice(0, 10);
         }
         
         // For Amazon: Look for Amazon image URLs
