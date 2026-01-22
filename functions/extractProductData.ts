@@ -30,8 +30,6 @@ Deno.serve(async (req) => {
         // Extract images directly from HTML 
         let extractedImages = [];
         
-        console.log('Processing URL:', productUrl);
-        
         // For Etsy: Extract images from JSON-LD structured data
         if (productUrl.includes('etsy.com')) {
             // Try to find JSON-LD structured data
@@ -65,7 +63,6 @@ Deno.serve(async (req) => {
             
             // Remove duplicates
             extractedImages = [...new Set(extractedImages)];
-            console.log('Etsy images found:', extractedImages.length, extractedImages.slice(0, 3));
         }
         
         // For Amazon: Look for Amazon image URLs
