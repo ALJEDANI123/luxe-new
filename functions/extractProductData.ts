@@ -19,31 +19,20 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Use LLM with web search to get product data AND images
+        // Use LLM to extract product data
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract ALL product information from this Etsy listing: ${productUrl}
-
-I need you to:
-1. Visit this exact URL
-2. Extract the product images from the page (look for high-resolution images with "il_794xN" in the URL)
-3. Extract product details
+            prompt: `Extract product information from: ${productUrl}
 
 Return:
 - title: Product name
 - subtitle: Product description (150-200 characters)
-- price: Number only (convert from any currency to USD, e.g., 26.46)
+- price: Number only (e.g., 26.46)
 - oldPrice: If on sale, null otherwise
 - rating: 0-5 stars
 - reviewsCount: Number of reviews
-- marketplace: "Etsy"
-- primeEligible: false
-- tags: Array of 5-8 relevant tags
-- images: Array of ACTUAL image URLs from the page (look for https://i.etsystatic.com URLs ending in .jpg with il_794xN). Return 5-10 images.
-
-CRITICAL: For images, you MUST extract the actual image URLs from the product page HTML. Look for URLs like:
-https://i.etsystatic.com/28790764/r/il/907249/7246871711/il_794xN.7246871711_d0uz.jpg
-
-DO NOT make up image URLs. Extract them from the actual page content.`,
+- marketplace: Etsy, Amazon, or eBay
+- primeEligible: false for non-Amazon
+- tags: Array of 5-8 relevant tags`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -59,14 +48,15 @@ DO NOT make up image URLs. Extract them from the actual page content.`,
                     tags: {
                         type: "array",
                         items: { type: "string" }
-                    },
-                    images: {
-                        type: "array",
-                        items: { type: "string" }
                     }
                 }
             }
         });
+        
+        // Generate placeholder image using product title as seed
+        // This is a temporary solution - uses Unsplash for demo purposes
+        const titleWords = result.title.toLowerCase().split(' ').slice(0, 3).join('+');
+        result.images = [`https://source.unsplash.com/800x600/?${titleWords},product`];
 
         return Response.json({ 
             success: true,
