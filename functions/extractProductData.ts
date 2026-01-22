@@ -72,10 +72,6 @@ Return ONLY the data, do NOT include images array as I will add it separately.`,
                     oldPrice: { type: ["number", "null"] },
                     rating: { type: "number" },
                     reviewsCount: { type: "number" },
-                    images: { 
-                        type: "array",
-                        items: { type: "string" }
-                    },
                     marketplace: { type: "string" },
                     primeEligible: { type: "boolean" },
                     tags: {
@@ -85,6 +81,9 @@ Return ONLY the data, do NOT include images array as I will add it separately.`,
                 }
             }
         });
+        
+        // Add the extracted images
+        result.images = extractedImages;
 
         return Response.json({ 
             success: true,
