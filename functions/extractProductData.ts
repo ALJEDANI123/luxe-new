@@ -19,37 +19,50 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Fetch page HTML
-        const pageResponse = await fetch(productUrl);
+        // Fetch the actual page content
+        const pageResponse = await fetch(productUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
         const pageHtml = await pageResponse.text();
         
+        // Extract images directly from HTML 
         let extractedImages = [];
         
-        // For Etsy
+        // For Etsy: Extract images from JSON-LD structured data
         if (productUrl.includes('etsy.com')) {
-            console.log('HTML length:', pageHtml.length);
-            console.log('Sample HTML (first 500 chars):', pageHtml.substring(0, 500));
-            console.log('Searching for il_794xN in HTML:', pageHtml.includes('il_794xN'));
+            // Try to find JSON-LD structured data
+            const jsonLdMatch = pageHtml.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi);
+            if (jsonLdMatch) {
+                for (const jsonBlock of jsonLdMatch) {
+                    try {
+                        const jsonContent = jsonBlock.replace(/<script[^>]*>|<\/script>/gi, '');
+                        const data = JSON.parse(jsonContent);
+                        if (data.image) {
+                            if (Array.isArray(data.image)) {
+                                extractedImages.push(...data.image);
+                            } else if (typeof data.image === 'string') {
+                                extractedImages.push(data.image);
+                            }
+                        }
+                    } catch (e) {
+                        // Continue if JSON parse fails
+                    }
+                }
+            }
             
-            // Try multiple patterns
-            const pattern1 = pageHtml.match(/https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_794xN\.\d+_[a-z0-9]+\.jpg/gi);
-            const pattern2 = pageHtml.match(/"(https:\/\/i\.etsystatic\.com[^"]+il_794xN[^"]+\.jpg)"/gi);
-            const pattern3 = pageHtml.match(/i\.etsystatic\.com[^\s"']+il_794xN[^\s"']+\.jpg/gi);
-            
-            console.log('Pattern 1 matches:', pattern1?.length || 0);
-            console.log('Pattern 2 matches:', pattern2?.length || 0);
-            console.log('Pattern 3 matches:', pattern3?.length || 0);
-            
-            if (pattern1) extractedImages.push(...pattern1);
-            if (pattern2) extractedImages.push(...pattern2.map(s => s.replace(/"/g, '')));
-            if (pattern3) extractedImages.push(...pattern3.map(url => url.startsWith('http') ? url : `https://${url}`));
+            // Fallback: regex search for high-res images
+            if (extractedImages.length === 0) {
+                const imageRegex = /"(https:\/\/i\.etsystatic\.com\/[^"]+il_794xN[^"]+\.jpg)"/g;
+                let match;
+                while ((match = imageRegex.exec(pageHtml)) !== null) {
+                    extractedImages.push(match[1]);
+                }
+            }
             
             // Remove duplicates
             extractedImages = [...new Set(extractedImages)];
-            console.log('Total extracted images:', extractedImages.length);
-            if (extractedImages.length > 0) {
-                console.log('First image:', extractedImages[0]);
-            }
         }
         
         // For Amazon: Look for Amazon image URLs
