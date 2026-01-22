@@ -19,37 +19,49 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
+        // Fetch the actual page content
+        const pageResponse = await fetch(productUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
+        const pageHtml = await pageResponse.text();
+        
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract product information from this URL: ${productUrl}
+            prompt: `Extract product data from this HTML page content. This is the actual HTML from ${productUrl}
 
-You must visit the actual product page and extract REAL data.
+HTML Content (first 100k chars):
+${pageHtml.substring(0, 100000)}
 
-CRITICAL INSTRUCTIONS:
-1. Extract the REAL product title exactly as shown on the page
-2. Extract the ACTUAL price (number only, no currency symbols)
-3. Extract the REAL rating and review count from the page
-4. Extract product description/subtitle
-5. MOST IMPORTANT: Extract ALL REAL product image URLs from the page
-   - For Etsy: Look for high-resolution images from i.etsystatic.com domain
-   - For Amazon: Look for images from images-na.ssl-images-amazon.com or m.media-amazon.com
-   - Extract at least 5-10 images if available (main image + gallery images)
-   - Return ACTUAL working URLs, not placeholder or example URLs
-   - Each URL must be complete and valid (starting with https://)
+CRITICAL EXTRACTION RULES:
 
-Return the data in this format:
-- title: string (actual product name)
-- subtitle: string (product description)
-- price: number (e.g. 15.99)
-- oldPrice: number or null
-- rating: number (0-5)
-- reviewsCount: number
-- images: array of strings (REAL image URLs - this is critical!)
-- marketplace: string (Amazon, Etsy, eBay, etc.)
-- primeEligible: boolean
-- tags: array of strings
+1. TITLE: Extract from <title> tag or h1 heading
+2. PRICE: Look for "$" or "Price:" in the HTML, extract numbers only (e.g., 26.46 not $26.46)
+3. RATING: Look for "5 out of 5 stars" or similar patterns
+4. IMAGES: MOST IMPORTANT - Extract ALL image URLs:
+   - For Etsy: Find ALL URLs containing "i.etsystatic.com" and "il_794xN" (high-res images)
+   - Example: https://i.etsystatic.com/28790764/r/il/907249/7246871711/il_794xN.7246871711_d0uz.jpg
+   - Extract minimum 5-8 images if available
+   - Return COMPLETE URLs starting with https://
+5. DESCRIPTION: Extract product description from the page
+6. MARKETPLACE: Determine from URL (Etsy, Amazon, eBay)
 
-CRITICAL: Make sure to extract REAL working image URLs from the actual product page. Test that the URLs are complete and valid.`,
-            add_context_from_internet: true,
+Return JSON with:
+{
+  "title": "exact product title",
+  "subtitle": "product description",
+  "price": 26.46,
+  "oldPrice": null,
+  "rating": 5,
+  "reviewsCount": 0,
+  "images": ["https://i.etsystatic.com/...il_794xN...jpg", ...],
+  "marketplace": "Etsy",
+  "primeEligible": false,
+  "tags": ["tag1", "tag2"]
+}
+
+CRITICAL: The images array must contain REAL working URLs from i.etsystatic.com domain for Etsy products!`,
+            add_context_from_internet: false,
             response_json_schema: {
                 type: "object",
                 properties: {
