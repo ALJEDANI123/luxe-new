@@ -65,7 +65,7 @@ export default function Home() {
                     transition={{ type: 'spring', stiffness: 260, damping: 20 }}
                 />
                 <motion.h1 
-                    className="text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-[var(--color-pink)] via-[var(--color-orange)] to-[var(--color-yellow)] bg-clip-text text-transparent leading-tight pb-2"
+                    className="text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-[var(--color-pink)] via-[var(--color-orange)] to-[var(--color-yellow)] bg-clip-text text-transparent leading-tight pb-3"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
