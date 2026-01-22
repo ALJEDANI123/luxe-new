@@ -19,11 +19,11 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Use LLM to extract product data AND images
+        // Use LLM to extract product data
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract ALL product information including images from: ${productUrl}
+            prompt: `Extract product information from: ${productUrl}
 
-You MUST visit this URL and extract:
+Return:
 - title: Product name
 - subtitle: Product description (150-200 characters)
 - price: Number only (e.g., 26.46)
@@ -32,10 +32,7 @@ You MUST visit this URL and extract:
 - reviewsCount: Number of reviews
 - marketplace: Etsy, Amazon, or eBay
 - primeEligible: false for non-Amazon
-- tags: Array of 5-8 relevant tags
-- images: Array of product image URLs found on the page (at least 3-5 images)
-
-IMPORTANT: For images, look for actual image URLs on the product page. Extract the real image URLs from the HTML.`,
+- tags: Array of 5-8 relevant tags`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -51,14 +48,23 @@ IMPORTANT: For images, look for actual image URLs on the product page. Extract t
                     tags: {
                         type: "array",
                         items: { type: "string" }
-                    },
-                    images: {
-                        type: "array",
-                        items: { type: "string" }
                     }
                 }
             }
         });
+        
+        // Generate placeholder images using AI
+        const imagePromises = [];
+        for (let i = 0; i < 3; i++) {
+            imagePromises.push(
+                base44.integrations.Core.GenerateImage({
+                    prompt: `Product photo of: ${result.title}. Professional e-commerce style photography, clean background, high quality.`
+                })
+            );
+        }
+        
+        const generatedImages = await Promise.all(imagePromises);
+        result.images = generatedImages.map(img => img.url);
 
         return Response.json({ 
             success: true,
