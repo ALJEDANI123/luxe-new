@@ -49,7 +49,7 @@ export default function MysteryBox() {
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
             {showConfetti && <Confetti />}
-            <h1 className="text-6xl font-black mb-4 leading-tight pb-2">Mystery Box</h1>
+            <h1 className="text-6xl font-black mb-4 bg-gradient-to-r from-[var(--color-pink)] via-[var(--color-purple)] to-[var(--color-blue)] bg-clip-text text-transparent leading-tight pb-2">Mystery Box</h1>
             <p className="text-xl mb-8">Spin the wheel to discover a random quirky product!</p>
 
             <Button onClick={handleSpin} disabled={isSpinning || candidates.length === 0} size="lg" className="text-2xl font-bold rounded-full px-12 py-8 bg-[var(--color-orange)] hover:bg-orange-600 mb-12">
