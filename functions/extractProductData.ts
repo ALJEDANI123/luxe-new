@@ -19,7 +19,50 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Use LLM to extract ALL data including images
+        // Fetch page with a proper browser-like request
+        const pageResponse = await fetch(productUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+            }
+        });
+        const pageHtml = await pageResponse.text();
+        
+        // Extract images from Open Graph meta tags and JSON-LD
+        let extractedImages = [];
+        
+        // Try Open Graph images first
+        const ogImageMatch = pageHtml.match(/<meta property="og:image" content="([^"]+)"/);
+        if (ogImageMatch) {
+            extractedImages.push(ogImageMatch[1]);
+        }
+        
+        // Try to find all images in meta tags
+        const metaImagesMatches = pageHtml.matchAll(/<meta[^>]*content="(https:\/\/i\.etsystatic\.com[^"]+)"/g);
+        for (const match of metaImagesMatches) {
+            if (match[1].includes('il_794xN') || match[1].includes('il_fullxfull')) {
+                extractedImages.push(match[1]);
+            }
+        }
+        
+        // Look for JSON embedded in the page
+        const scriptMatches = pageHtml.matchAll(/<script[^>]*>(.*?)<\/script>/gs);
+        for (const scriptMatch of scriptMatches) {
+            const scriptContent = scriptMatch[1];
+            // Find image URLs in any JSON structures
+            const imageUrlMatches = scriptContent.matchAll(/"(https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_(?:794xN|fullxfull)\.\d+_[a-z0-9]+\.jpg)"/g);
+            for (const urlMatch of imageUrlMatches) {
+                extractedImages.push(urlMatch[1]);
+            }
+        }
+        
+        // Remove duplicates and limit
+        extractedImages = [...new Set(extractedImages)].slice(0, 10);
+        
+        console.log('Extracted images:', extractedImages);
+        
+        // Use LLM to extract product data (without images)
         const result = await base44.integrations.Core.InvokeLLM({
             prompt: `Extract product information from this product page URL: ${productUrl}
 
@@ -32,9 +75,8 @@ Visit the page and extract:
 - reviewsCount: Number of reviews
 - marketplace: Etsy, Amazon, or eBay
 - tags: Array of relevant tags
-- images: Array of ACTUAL product image URLs (high resolution if available). For Etsy, look for URLs containing "il_794xN". Return up to 10 images. DO NOT return placeholder text - only actual direct image URLs starting with https://
 
-IMPORTANT: The images array must contain REAL image URLs, not placeholder text. Each URL should be a direct link to an image file.`,
+Return ONLY the data, do NOT include images.`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -50,14 +92,13 @@ IMPORTANT: The images array must contain REAL image URLs, not placeholder text. 
                     tags: {
                         type: "array",
                         items: { type: "string" }
-                    },
-                    images: {
-                        type: "array",
-                        items: { type: "string" }
                     }
                 }
             }
         });
+        
+        // Add extracted images to result
+        result.images = extractedImages;
 
         return Response.json({ 
             success: true,
