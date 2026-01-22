@@ -63,6 +63,7 @@ Deno.serve(async (req) => {
             
             // Remove duplicates
             extractedImages = [...new Set(extractedImages)];
+            console.log('Etsy images found:', extractedImages.length, extractedImages.slice(0, 3));
         }
         
         // For Amazon: Look for Amazon image URLs
