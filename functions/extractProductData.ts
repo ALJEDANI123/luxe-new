@@ -19,21 +19,26 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Use LLM to extract product data
+        // Fetch the actual product page HTML
+        const pageResponse = await fetch(productUrl);
+        const html = await pageResponse.text();
+        
+        // Use LLM to extract all data including actual image URLs from the HTML
         const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract product information from: ${productUrl}
-
-Return:
+            prompt: `From this product page HTML, extract:
 - title: Product name
 - subtitle: Product description (150-200 characters)
-- price: Number only (e.g., 26.46)
-- oldPrice: If on sale, null otherwise
+- price: Number only
+- oldPrice: If on sale, otherwise null
 - rating: 0-5 stars
 - reviewsCount: Number of reviews
-- marketplace: Etsy, Amazon, or eBay
-- primeEligible: false for non-Amazon
-- tags: Array of 5-8 relevant tags`,
-            add_context_from_internet: true,
+- marketplace: Detect if Etsy, Amazon, or eBay
+- primeEligible: true only if Amazon Prime
+- tags: 5-8 relevant keywords
+- images: Extract ALL actual image URLs from the page (look for og:image, product images, gallery images - get at least 3-5 real image URLs)
+
+HTML content:
+${html.slice(0, 50000)}`,
             response_json_schema: {
                 type: "object",
                 properties: {
@@ -45,26 +50,11 @@ Return:
                     reviewsCount: { type: "number" },
                     marketplace: { type: "string" },
                     primeEligible: { type: "boolean" },
-                    tags: {
-                        type: "array",
-                        items: { type: "string" }
-                    }
+                    tags: { type: "array", items: { type: "string" } },
+                    images: { type: "array", items: { type: "string" } }
                 }
             }
         });
-        
-        // Generate placeholder images using AI
-        const imagePromises = [];
-        for (let i = 0; i < 3; i++) {
-            imagePromises.push(
-                base44.integrations.Core.GenerateImage({
-                    prompt: `Product photo of: ${result.title}. Professional e-commerce style photography, clean background, high quality.`
-                })
-            );
-        }
-        
-        const generatedImages = await Promise.all(imagePromises);
-        result.images = generatedImages.map(img => img.url);
 
         return Response.json({ 
             success: true,
