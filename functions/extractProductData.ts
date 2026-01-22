@@ -19,23 +19,25 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Use Base44 LLM with vision to extract images
-        const imageExtraction = await base44.integrations.Core.InvokeLLM({
-            prompt: `Extract ALL product image URLs from this page. Look for high-resolution images (il_794xN for Etsy). Return ONLY an array of image URLs, nothing else.`,
-            add_context_from_internet: true,
-            file_urls: [productUrl],
-            response_json_schema: {
-                type: "object",
-                properties: {
-                    images: {
-                        type: "array",
-                        items: { type: "string" }
-                    }
-                }
-            }
-        });
+        // Fetch page HTML
+        const pageResponse = await fetch(productUrl);
+        const pageHtml = await pageResponse.text();
         
-        let extractedImages = imageExtraction.images || [];
+        let extractedImages = [];
+        
+        // For Etsy
+        if (productUrl.includes('etsy.com')) {
+            // Search for all il_794xN image patterns
+            const allMatches = pageHtml.match(/i\.etsystatic\.com[^\s"'<>)]+il_794xN[^\s"'<>)]+\.jpg/gi);
+            if (allMatches) {
+                extractedImages = allMatches.map(url => {
+                    // Ensure https://
+                    return url.startsWith('http') ? url : `https://${url}`;
+                });
+                // Remove duplicates
+                extractedImages = [...new Set(extractedImages)];
+            }
+        }
         
         // For Amazon: Look for Amazon image URLs
         if (productUrl.includes('amazon.com')) {
