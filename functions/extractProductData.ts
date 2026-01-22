@@ -27,11 +27,9 @@ Deno.serve(async (req) => {
         
         // For Etsy
         if (productUrl.includes('etsy.com')) {
-            // Write HTML to file for debugging
-            await Deno.writeTextFile('/tmp/etsy_page.html', pageHtml);
-            console.log('HTML saved to /tmp/etsy_page.html');
             console.log('HTML length:', pageHtml.length);
-            console.log('Sample HTML:', pageHtml.substring(0, 1000));
+            console.log('Sample HTML (first 500 chars):', pageHtml.substring(0, 500));
+            console.log('Searching for il_794xN in HTML:', pageHtml.includes('il_794xN'));
             
             // Try multiple patterns
             const pattern1 = pageHtml.match(/https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_794xN\.\d+_[a-z0-9]+\.jpg/gi);
@@ -49,6 +47,9 @@ Deno.serve(async (req) => {
             // Remove duplicates
             extractedImages = [...new Set(extractedImages)];
             console.log('Total extracted images:', extractedImages.length);
+            if (extractedImages.length > 0) {
+                console.log('First image:', extractedImages[0]);
+            }
         }
         
         // For Amazon: Look for Amazon image URLs
