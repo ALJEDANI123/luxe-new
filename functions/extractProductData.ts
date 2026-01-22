@@ -32,11 +32,27 @@ Deno.serve(async (req) => {
         
         // For Etsy: Look for il_794xN images (high resolution)
         if (productUrl.includes('etsy.com')) {
-            const etsyImageRegex = /https:\/\/i\.etsystatic\.com\/[^"'\s]+il_794xN[^"'\s]+\.jpg/g;
-            const matches = pageHtml.match(etsyImageRegex);
-            if (matches) {
-                extractedImages = [...new Set(matches)]; // Remove duplicates
+            // Look for URLs in various formats
+            const patterns = [
+                /https:\/\/i\.etsystatic\.com\/[^"'\s<>]+il_794xN[^"'\s<>]+\.jpg/gi,
+                /i\.etsystatic\.com\/[^"'\s<>]+\/il_794xN[^"'\s<>]+\.jpg/gi
+            ];
+            
+            for (const pattern of patterns) {
+                const matches = pageHtml.match(pattern);
+                if (matches) {
+                    matches.forEach(url => {
+                        // Ensure URL starts with https://
+                        if (!url.startsWith('http')) {
+                            url = 'https://' + url;
+                        }
+                        extractedImages.push(url);
+                    });
+                }
             }
+            
+            // Remove duplicates
+            extractedImages = [...new Set(extractedImages)];
         }
         
         // For Amazon: Look for Amazon image URLs
