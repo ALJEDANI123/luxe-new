@@ -51,7 +51,7 @@ export default function QuirkyFinds() {
                     <Sparkles className="w-10 h-10 text-white" />
                 </motion.div>
                 <motion.h1 
-                    className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-[var(--color-pink)] via-[var(--color-purple)] to-[var(--color-blue)] bg-clip-text text-transparent leading-tight pb-2"
+                    className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-[var(--color-teal)] via-[var(--color-blue)] to-[var(--color-purple)] bg-clip-text text-transparent leading-tight pb-2"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
@@ -59,7 +59,7 @@ export default function QuirkyFinds() {
                     Quirky Finds
                 </motion.h1>
                 <motion.p 
-                    className="text-xl text-dark/70 dark:text-off-white/70 max-w-2xl mx-auto"
+                    className="text-lg text-dark/70 dark:text-off-white/70 max-w-2xl mx-auto"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
