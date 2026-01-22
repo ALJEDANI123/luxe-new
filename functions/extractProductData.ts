@@ -30,39 +30,19 @@ Deno.serve(async (req) => {
         // Extract images directly from HTML 
         let extractedImages = [];
         
-        // For Etsy: Extract images from JSON-LD structured data
+        // For Etsy: Extract high-resolution images (il_794xN)
         if (productUrl.includes('etsy.com')) {
-            // Try to find JSON-LD structured data
-            const jsonLdMatch = pageHtml.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi);
-            if (jsonLdMatch) {
-                for (const jsonBlock of jsonLdMatch) {
-                    try {
-                        const jsonContent = jsonBlock.replace(/<script[^>]*>|<\/script>/gi, '');
-                        const data = JSON.parse(jsonContent);
-                        if (data.image) {
-                            if (Array.isArray(data.image)) {
-                                extractedImages.push(...data.image);
-                            } else if (typeof data.image === 'string') {
-                                extractedImages.push(data.image);
-                            }
-                        }
-                    } catch (e) {
-                        // Continue if JSON parse fails
-                    }
-                }
-            }
+            // Pattern to match il_794xN images (high resolution)
+            const imageRegex = /https:\/\/i\.etsystatic\.com\/[^"\s]+il_794xN[^"\s]+\.jpg/gi;
+            const matches = pageHtml.match(imageRegex);
             
-            // Fallback: regex search for high-res images
-            if (extractedImages.length === 0) {
-                const imageRegex = /"(https:\/\/i\.etsystatic\.com\/[^"]+il_794xN[^"]+\.jpg)"/g;
-                let match;
-                while ((match = imageRegex.exec(pageHtml)) !== null) {
-                    extractedImages.push(match[1]);
-                }
+            if (matches) {
+                // Remove duplicates and clean URLs
+                extractedImages = [...new Set(matches.map(url => {
+                    // Clean any HTML entities or extra characters
+                    return url.replace(/&amp;/g, '&').replace(/\\"/g, '');
+                }))];
             }
-            
-            // Remove duplicates
-            extractedImages = [...new Set(extractedImages)];
         }
         
         // For Amazon: Look for Amazon image URLs
