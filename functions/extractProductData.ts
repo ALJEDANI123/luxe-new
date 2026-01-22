@@ -19,41 +19,23 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Fetch the actual page content
-        const pageResponse = await fetch(productUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-        });
-        const pageHtml = await pageResponse.text();
-        
-        // Extract images directly from HTML 
-        let extractedImages = [];
-        
-        // For Etsy: Extract high-resolution images (il_794xN)
-        if (productUrl.includes('etsy.com')) {
-            // Multiple patterns to catch all image formats
-            const patterns = [
-                // Pattern 1: Standard quoted URLs
-                /"(https:\/\/i\.etsystatic\.com\/[^"]+\/il_794xN\.[^"]+\.jpg)"/gi,
-                // Pattern 2: URLs in data attributes or without quotes
-                /https:\/\/i\.etsystatic\.com\/\d+\/r\/il\/[a-f0-9]+\/\d+\/il_794xN\.\d+_[a-z0-9]+\.jpg/gi
-            ];
-            
-            for (const pattern of patterns) {
-                let match;
-                const regex = new RegExp(pattern);
-                while ((match = regex.exec(pageHtml)) !== null) {
-                    const url = match[1] || match[0];
-                    extractedImages.push(url);
+        // Use Base44 LLM with vision to extract images
+        const imageExtraction = await base44.integrations.Core.InvokeLLM({
+            prompt: `Extract ALL product image URLs from this page. Look for high-resolution images (il_794xN for Etsy). Return ONLY an array of image URLs, nothing else.`,
+            add_context_from_internet: true,
+            file_urls: [productUrl],
+            response_json_schema: {
+                type: "object",
+                properties: {
+                    images: {
+                        type: "array",
+                        items: { type: "string" }
+                    }
                 }
             }
-            
-            // Remove duplicates
-            extractedImages = [...new Set(extractedImages)];
-            
-            console.log('Extracted images:', extractedImages);
-        }
+        });
+        
+        let extractedImages = imageExtraction.images || [];
         
         // For Amazon: Look for Amazon image URLs
         if (productUrl.includes('amazon.com')) {
