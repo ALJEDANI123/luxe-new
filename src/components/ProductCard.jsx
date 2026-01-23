@@ -9,7 +9,6 @@ import { formatPrice, getFallbackImage } from '@/components/utils/helpers';
 export default function ProductCard({ product, onFavoriteChange, userFavorites, user }) {
     const [isFavorite, setIsFavorite] = useState(false);
     const [favoriteId, setFavoriteId] = useState(null);
-    const [favoritesCount, setFavoritesCount] = useState(0);
 
     useEffect(() => {
         if (userFavorites) {
@@ -22,11 +21,6 @@ export default function ProductCard({ product, onFavoriteChange, userFavorites, 
                 setFavoriteId(null);
             }
         }
-        
-        // Get favorites count for this product
-        base44.entities.Favorite.filter({ product_id: product.id })
-            .then(favorites => setFavoritesCount(favorites.length))
-            .catch(() => setFavoritesCount(0));
     }, [userFavorites, product.id]);
 
     const toggleFavorite = async (e) => {
@@ -98,11 +92,6 @@ export default function ProductCard({ product, onFavoriteChange, userFavorites, 
                             }`} 
                         />
                     </Button>
-                    {favoritesCount > 0 && (
-                        <span className="text-xs font-bold text-gray-700 bg-white/90 px-2 py-0.5 rounded-full shadow">
-                            {favoritesCount}
-                        </span>
-                    )}
                 </div>
             </div>
             <div className="p-4 flex flex-col flex-grow">

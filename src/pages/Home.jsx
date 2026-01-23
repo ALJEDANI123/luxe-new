@@ -14,6 +14,7 @@ export default function Home() {
     const [products, setProducts] = useState([]);
     const [displayedProducts, setDisplayedProducts] = useState([]);
     const [loadedCount, setLoadedCount] = useState(12);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const [userFavorites, setUserFavorites] = useState([]);
     const [user, setUser] = useState(null);
@@ -41,16 +42,18 @@ export default function Home() {
         const handleScroll = () => {
             if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 600) {
                 if (loadedCount < products.length && !isLoadingMore) {
+                    setIsLoadingMore(true);
                     const nextCount = Math.min(loadedCount + 8, products.length);
                     setDisplayedProducts(products.slice(0, nextCount));
                     setLoadedCount(nextCount);
+                    setTimeout(() => setIsLoadingMore(false), 500);
                 }
             }
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [products, loadedCount]);
+    }, [products, loadedCount, isLoadingMore]);
 
     return (
         <div className="space-y-24">
