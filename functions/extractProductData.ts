@@ -19,19 +19,16 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Step 1: Use microlink.io to extract metadata and images
+        // Step 1: Use microlink.io to extract main image
         const microlinkResponse = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(productUrl)}`);
         const microlinkData = await microlinkResponse.json();
         
         let productImages = [];
-        if (microlinkData.status === 'success' && microlinkData.data) {
-            // Get main image from microlink
-            if (microlinkData.data.image?.url) {
-                productImages.push(microlinkData.data.image.url);
-            }
+        if (microlinkData.status === 'success' && microlinkData.data?.image?.url) {
+            productImages.push(microlinkData.data.image.url);
         }
 
-        // Step 2: Use LLM to extract detailed product data
+        // Step 2: Use LLM to extract all product data including additional images
         const llmResult = await base44.integrations.Core.InvokeLLM({
             prompt: `From the product page at ${productUrl}, extract:
 - title: Exact product name
@@ -42,7 +39,8 @@ Deno.serve(async (req) => {
 - reviewsCount: Number of reviews (number only)
 - marketplace: The website name (e.g., Amazon, Etsy, eBay, Garmin, etc.)
 - primeEligible: true if Amazon Prime badge exists, otherwise false
-- tags: 5-8 relevant keywords as array`,
+- tags: 5-8 relevant keywords as array
+- additionalImages: Array of 2-4 additional product image URLs (high quality product photos only, NO logos or ads)`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -55,12 +53,29 @@ Deno.serve(async (req) => {
                     reviewsCount: { type: "number" },
                     marketplace: { type: "string" },
                     primeEligible: { type: "boolean" },
-                    tags: { type: "array", items: { type: "string" } }
+                    tags: { type: "array", items: { type: "string" } },
+                    additionalImages: { type: "array", items: { type: "string" } }
                 }
             }
         });
 
-        const result = { ...llmResult, images: productImages }
+        // Combine microlink image with LLM additional images
+        if (llmResult.additionalImages && Array.isArray(llmResult.additionalImages)) {
+            productImages = [...productImages, ...llmResult.additionalImages];
+        }
+
+        const result = { 
+            title: llmResult.title,
+            subtitle: llmResult.subtitle,
+            price: llmResult.price,
+            oldPrice: llmResult.oldPrice,
+            rating: llmResult.rating,
+            reviewsCount: llmResult.reviewsCount,
+            marketplace: llmResult.marketplace,
+            primeEligible: llmResult.primeEligible,
+            tags: llmResult.tags,
+            images: productImages
+        }
 
         return Response.json({ 
             success: true,
