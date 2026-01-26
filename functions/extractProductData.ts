@@ -95,10 +95,29 @@ Deno.serve(async (req) => {
             }
         });
 
-        // Filter and clean image URLs
-        const MAX_IMAGES = 10;
-        const finalImages = Array.from(extractedImages)
-            .filter(url => url && (url.startsWith('http://') || url.startsWith('https://')) && /\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(url))
+        // Filter and clean image URLs from TRUSTED sources only
+        const MAX_IMAGES = 5;
+        const excludedDomains = ['googleadservices', 'doubleclick', 'facebook.com/tr', 'analytics', 'pixel', 'tracking'];
+        
+        const finalImages = Array.from(trustedImages)
+            .filter(url => {
+                // Must be valid HTTP/HTTPS URL
+                if (!url || !(url.startsWith('http://') || url.startsWith('https://'))) return false;
+                
+                // Must have image extension
+                if (!/\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url)) return false;
+                
+                // Exclude small icons (less than 100x100 indicated in URL)
+                if (/\/\d+x\d+\//i.test(url)) {
+                    const sizeMatch = url.match(/\/(\d+)x(\d+)\//);
+                    if (sizeMatch && parseInt(sizeMatch[1]) < 100 && parseInt(sizeMatch[2]) < 100) return false;
+                }
+                
+                // Exclude ad/tracking domains
+                if (excludedDomains.some(domain => url.includes(domain))) return false;
+                
+                return true;
+            })
             .slice(0, MAX_IMAGES);
 
         // Combine results
