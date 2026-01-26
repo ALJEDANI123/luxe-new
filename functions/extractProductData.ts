@@ -23,34 +23,19 @@ Deno.serve(async (req) => {
         const pageResponse = await fetch(productUrl);
         const html = await pageResponse.text();
 
-        const extractedImages = new Set();
-
-        // Helper to extract URLs from attributes like srcset
-        const extractUrlsFromAttribute = (attrValue) => {
-            const urls = [];
-            if (!attrValue) return urls;
-
-            // Handles comma-separated URLs (srcset) and space-separated (single URL with descriptor)
-            const parts = attrValue.split(',').map(s => s.trim());
-            for (const part of parts) {
-                const url = part.split(' ')[0]; // Take the URL part before any size descriptors
-                if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-                    urls.push(url);
-                }
-            }
-            return urls;
-        };
-
-        // 1. Extract from Open Graph and Twitter card meta tags
+        // Priority 1: Trusted sources (Open Graph + JSON-LD)
+        const trustedImages = new Set();
+        
+        // 1. Extract from Open Graph and Twitter card meta tags (HIGHEST PRIORITY)
         let match;
         const metaImageRegex = /<meta[^>]*property=["'](og|twitter):image["'][^>]*content=["']([^"']+)["']/gi;
         while ((match = metaImageRegex.exec(html)) !== null) {
             if (match[2] && (match[2].startsWith('http://') || match[2].startsWith('https://'))) {
-                extractedImages.add(match[2]);
+                trustedImages.add(match[2]);
             }
         }
 
-        // 2. Extract from JSON-LD structured data
+        // 2. Extract from JSON-LD structured data (HIGH PRIORITY)
         const jsonLdRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([^<]+)<\/script>/gi;
         while ((match = jsonLdRegex.exec(html)) !== null) {
             try {
@@ -60,9 +45,9 @@ Deno.serve(async (req) => {
                     if (Array.isArray(imgData)) {
                         imgData.forEach(img => processImage(img));
                     } else if (typeof imgData === 'string' && (imgData.startsWith('http://') || imgData.startsWith('https://'))) {
-                        extractedImages.add(imgData);
+                        trustedImages.add(imgData);
                     } else if (typeof imgData === 'object' && imgData.url && (imgData.url.startsWith('http://') || imgData.url.startsWith('https://'))) {
-                        extractedImages.add(imgData.url);
+                        trustedImages.add(imgData.url);
                     }
                 };
 
@@ -87,34 +72,6 @@ Deno.serve(async (req) => {
 
             } catch (e) {
                 console.warn("Error parsing JSON-LD:", e);
-            }
-        }
-
-        // 3. Extract from <img> tags: src, data-src, data-large-image
-        const imgTagSrcRegex = /<img[^>]*?(?:src|data-src|data-large-image)=["']([^"']+)["'][^>]*>/gi;
-        while ((match = imgTagSrcRegex.exec(html)) !== null) {
-            const urls = extractUrlsFromAttribute(match[1]);
-            urls.forEach(url => extractedImages.add(url));
-        }
-
-        // 4. Extract from <img> tags: srcset, data-srcset
-        const imgTagSrcsetRegex = /<img[^>]*?(?:srcset|data-srcset)=["']([^"']+)["'][^>]*>/gi;
-        while ((match = imgTagSrcsetRegex.exec(html)) !== null) {
-            const urls = extractUrlsFromAttribute(match[1]);
-            urls.forEach(url => extractedImages.add(url));
-        }
-
-        // 5. Look for background images in style attributes
-        const styleBgImageRegex = /url\(["']?([^"')]+)["']?\)/gi;
-        const styleAttrRegex = /<[^>]*?style=["']([^"']+)["'][^>]*>/gi;
-        while ((match = styleAttrRegex.exec(html)) !== null) {
-            const styleContent = match[1];
-            let bgMatch;
-            while ((bgMatch = styleBgImageRegex.exec(styleContent)) !== null) {
-                const url = bgMatch[1].trim();
-                if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-                    extractedImages.add(url);
-                }
             }
         }
 
