@@ -19,7 +19,19 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Product URL is required' }, { status: 400 });
         }
 
-        // Use LLM with internet context to extract ALL product data including images
+        // Step 1: Use microlink.io to extract metadata and images
+        const microlinkResponse = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(productUrl)}`);
+        const microlinkData = await microlinkResponse.json();
+        
+        let productImages = [];
+        if (microlinkData.status === 'success' && microlinkData.data) {
+            // Get main image from microlink
+            if (microlinkData.data.image?.url) {
+                productImages.push(microlinkData.data.image.url);
+            }
+        }
+
+        // Step 2: Use LLM to extract detailed product data
         const llmResult = await base44.integrations.Core.InvokeLLM({
             prompt: `From the product page at ${productUrl}, extract:
 - title: Exact product name
@@ -30,17 +42,7 @@ Deno.serve(async (req) => {
 - reviewsCount: Number of reviews (number only)
 - marketplace: The website name (e.g., Amazon, Etsy, eBay, Garmin, etc.)
 - primeEligible: true if Amazon Prime badge exists, otherwise false
-- tags: 5-8 relevant keywords as array
-- images: Array of ONLY the main product images URLs (NOT logos, icons, or ads). Extract 3-5 high quality product images only.
-
-CRITICAL: For images, extract ONLY the actual product photos displayed on the page. Do NOT include:
-- Website logos
-- Icons or badges
-- Advertisement images
-- Related products thumbnails
-- Navigation images
-
-Return the actual product image URLs that show the product being sold.`,
+- tags: 5-8 relevant keywords as array`,
             add_context_from_internet: true,
             response_json_schema: {
                 type: "object",
@@ -53,13 +55,12 @@ Return the actual product image URLs that show the product being sold.`,
                     reviewsCount: { type: "number" },
                     marketplace: { type: "string" },
                     primeEligible: { type: "boolean" },
-                    tags: { type: "array", items: { type: "string" } },
-                    images: { type: "array", items: { type: "string" } }
+                    tags: { type: "array", items: { type: "string" } }
                 }
             }
         });
 
-        const result = llmResult;
+        const result = { ...llmResult, images: productImages }
 
         return Response.json({ 
             success: true,
