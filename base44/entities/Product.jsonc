@@ -1,0 +1,72 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "price": {
+      "type": "number"
+    },
+    "oldPrice": {
+      "type": "number"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "reviewsCount": {
+      "type": "number"
+    },
+    "category_id": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "marketplace": {
+      "type": "string",
+      "default": "Amazon"
+    },
+    "affiliateUrl": {
+      "type": "string"
+    },
+    "primeEligible": {
+      "type": "boolean",
+      "default": false
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isMysteryBoxCandidate": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "price",
+    "category_id",
+    "affiliateUrl"
+  ]
+}
