@@ -30,8 +30,8 @@ function LayoutContent({ children }) {
             ];
 
     useEffect(() => {
-        // Load Trade Winds font only
-        if (!document.querySelector('link[href*="Trade+Winds"]')) {
+        // Load Bungee (headings) + Fredoka (body)
+        if (!document.querySelector('link[href*="Bungee"]')) {
             const preconnect1 = document.createElement('link');
             preconnect1.rel = 'preconnect';
             preconnect1.href = 'https://fonts.googleapis.com';
@@ -43,10 +43,10 @@ function LayoutContent({ children }) {
             preconnect2.setAttribute('crossorigin', 'anonymous');
             document.head.insertBefore(preconnect2, document.head.firstChild);
 
-            const tradeWindsLink = document.createElement('link');
-            tradeWindsLink.href = 'https://fonts.googleapis.com/css2?family=Trade+Winds&display=swap';
-            tradeWindsLink.rel = 'stylesheet';
-            document.head.appendChild(tradeWindsLink);
+            const fontsLink = document.createElement('link');
+            fontsLink.href = 'https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;500;600;700&display=swap';
+            fontsLink.rel = 'stylesheet';
+            document.head.appendChild(fontsLink);
         }
 
         base44.auth.me().then(setUser).catch(() => setUser(null));
@@ -86,8 +86,15 @@ function LayoutContent({ children }) {
                     --color-off-white: #FFF7FB;
                 }
                 
+                :root {
+                    --font-heading: 'Bungee', cursive;
+                    --font-body: 'Fredoka', sans-serif;
+                }
+                h1, h2, h3, h4, h5, h6 {
+                    font-family: 'Bungee', cursive !important;
+                }
                 * {
-                    font-family: 'Trade Winds', cursive, sans-serif !important;
+                    font-family: 'Fredoka', sans-serif !important;
                 }
             `}</style>
             <div className="min-h-screen bg-off-white dark:bg-gray-900 text-dark dark:text-off-white transition-colors duration-300">
