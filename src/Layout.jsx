@@ -30,12 +30,8 @@ function LayoutContent({ children }) {
             ];
 
     useEffect(() => {
-        // Check if font links already exist to avoid duplicates
-        const existingNotoSans = document.querySelector('link[href*="Noto+Sans"]');
-        const existingTradeWinds = document.querySelector('link[href*="Trade+Winds"]');
-
-        if (!existingNotoSans || !existingTradeWinds) {
-            // Add preconnect for faster font loading
+        // Load Trade Winds font only
+        if (!document.querySelector('link[href*="Trade+Winds"]')) {
             const preconnect1 = document.createElement('link');
             preconnect1.rel = 'preconnect';
             preconnect1.href = 'https://fonts.googleapis.com';
@@ -47,13 +43,6 @@ function LayoutContent({ children }) {
             preconnect2.setAttribute('crossorigin', 'anonymous');
             document.head.insertBefore(preconnect2, document.head.firstChild);
 
-            // Load Noto Sans font
-            const fontLink = document.createElement('link');
-            fontLink.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap';
-            fontLink.rel = 'stylesheet';
-            document.head.appendChild(fontLink);
-
-            // Load Trade Winds font
             const tradeWindsLink = document.createElement('link');
             tradeWindsLink.href = 'https://fonts.googleapis.com/css2?family=Trade+Winds&display=swap';
             tradeWindsLink.rel = 'stylesheet';
@@ -98,7 +87,7 @@ function LayoutContent({ children }) {
                 }
                 
                 * {
-                    font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                    font-family: 'Trade Winds', cursive, sans-serif !important;
                 }
             `}</style>
             <div className="min-h-screen bg-off-white dark:bg-gray-900 text-dark dark:text-off-white transition-colors duration-300">
