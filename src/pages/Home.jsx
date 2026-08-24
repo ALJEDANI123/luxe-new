@@ -68,7 +68,7 @@ export default function Home() {
                     transition={{ type: 'spring', stiffness: 260, damping: 20 }}
                 />
                 <motion.h1 
-                    className="font-coiny text-4xl md:text-5xl mb-8 bg-gradient-to-r from-[var(--color-pink)] via-[var(--color-orange)] to-[var(--color-yellow)] bg-clip-text text-transparent leading-tight pb-3"
+                    className="font-coiny text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-[var(--color-pink)] via-[var(--color-orange)] to-[var(--color-yellow)] bg-clip-text text-transparent leading-tight pb-3"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
@@ -100,7 +100,7 @@ export default function Home() {
 
             {/* Featured Products */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-2xl md:text-3xl text-center mb-8 leading-tight pb-2">Featured Finds</h2>
+                <h2 className="text-4xl font-black text-center mb-8 leading-tight pb-2">Featured Finds</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
                     {displayedProducts.map((product, i) => (
                         <ProductCard key={product.id} product={product} userFavorites={userFavorites} user={user} />
