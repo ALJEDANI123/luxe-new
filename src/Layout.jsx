@@ -44,7 +44,7 @@ function LayoutContent({ children }) {
             document.head.insertBefore(preconnect2, document.head.firstChild);
 
             const fontsLink = document.createElement('link');
-            fontsLink.href = 'https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;500;600;700&display=swap';
+            fontsLink.href = 'https://fonts.googleapis.com/css2?family=Coiny&family=Fredoka:wght@400;500;600;700&display=swap';
             fontsLink.rel = 'stylesheet';
             document.head.appendChild(fontsLink);
         }
@@ -87,11 +87,11 @@ function LayoutContent({ children }) {
                 }
                 
                 :root {
-                    --font-heading: 'Bungee', cursive;
+                    --font-heading: 'Coiny', cursive;
                     --font-body: 'Fredoka', sans-serif;
                 }
                 h1, h2, h3, h4, h5, h6 {
-                    font-family: 'Bungee', cursive !important;
+                    font-family: 'Coiny', cursive !important;
                 }
                 * {
                     font-family: 'Fredoka', sans-serif !important;
