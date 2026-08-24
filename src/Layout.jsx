@@ -148,7 +148,7 @@ const Header = ({ user, isDarkMode, toggleTheme, isMenuOpen, setIsMenuOpen, isSe
                     <img src={LOGO_URL} alt="BagiLand Logo" className="h-20 sm:h-24 md:h-32 object-contain" />
                 </Link>
 
-                <nav className="hidden md:flex items-center gap-6">
+                <nav className="hidden md:flex items-center gap-10">
                     {navItems.map(item => (
                         <motion.div key={item.title} whileHover={{ y: -3 }}>
                             <Link to={item.href} className={`font-medium text-base transition-colors ${location.pathname === item.href ? 'text-[var(--color-pink)]' : 'hover:text-[var(--color-pink)]'}`}>
@@ -211,7 +211,7 @@ const Header = ({ user, isDarkMode, toggleTheme, isMenuOpen, setIsMenuOpen, isSe
                     exit={{ opacity: 0, y: -20 }}
                     className="md:hidden bg-white dark:bg-gray-800 py-4"
                 >
-                    <nav className="flex flex-col items-center space-y-4">
+                    <nav className="flex flex-col items-center space-y-6">
                         {navItems.map(item => (
                             <Link key={item.title} to={item.href} className="font-medium text-base" onClick={() => setIsMenuOpen(false)}>{item.title}</Link>
                         ))}
