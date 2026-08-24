@@ -44,7 +44,7 @@ function LayoutContent({ children }) {
             document.head.insertBefore(preconnect2, document.head.firstChild);
 
             const fontsLink = document.createElement('link');
-            fontsLink.href = 'https://fonts.googleapis.com/css2?family=Coiny&family=Fredoka:wght@400;500;600;700&display=swap';
+            fontsLink.href = 'https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;500;600;700&family=Coiny&family=Fredoka:wght@400;500;600;700&display=swap';
             fontsLink.rel = 'stylesheet';
             document.head.appendChild(fontsLink);
         }
@@ -87,14 +87,17 @@ function LayoutContent({ children }) {
                 }
                 
                 :root {
-                    --font-heading: 'Coiny', cursive;
+                    --font-heading: 'DynaPuff', cursive;
                     --font-body: 'Fredoka', sans-serif;
                 }
                 h1, h2, h3, h4, h5, h6 {
-                    font-family: 'Coiny', cursive !important;
+                    font-family: 'DynaPuff', cursive !important;
                 }
                 * {
                     font-family: 'Fredoka', sans-serif !important;
+                }
+                .font-coiny {
+                    font-family: 'Coiny', cursive !important;
                 }
             `}</style>
             <div className="min-h-screen bg-off-white dark:bg-gray-900 text-dark dark:text-off-white transition-colors duration-300">
