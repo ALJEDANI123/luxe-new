@@ -58,7 +58,7 @@ export default function Home() {
     return (
         <div className="space-y-24">
             {/* Hero Section */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-center">
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 text-center">
                 <motion.img
                     src={CLOWN_MASCOT_URL}
                     alt="BagiLand Clown Mascot"
@@ -76,7 +76,7 @@ export default function Home() {
                     Welcome to BagiLand!
                 </motion.h1>
                 <motion.p 
-                    className="text-xl md:text-2xl text-dark/80 dark:text-off-white/80 max-w-2xl mx-auto mb-8"
+                    className="text-xl md:text-2xl text-dark/80 dark:text-off-white/80 max-w-2xl mx-auto mb-14"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
