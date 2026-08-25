@@ -8,18 +8,12 @@ css
         font-family: 'Fredoka', sans-serif;
     }
     h1, h2, h3, h4, h5, h6 {
-        font-family: 'DynaPuff', cursive;
-        font-weight: 400 !important;
+        font-family: 'Fredoka', sans-serif;
     }
 }
 
 *, *::before, *::after {
     font-family: 'Fredoka', sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6, h1::before, h2::before, h3::before, h4::before, h5::before, h6::before {
-    font-family: 'DynaPuff', cursive;
-    font-weight: 400 !important;
 }
 
 .font-coiny {
