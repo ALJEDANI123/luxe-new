@@ -83,19 +83,7 @@ export default function Home() {
                 >
                     Hand-picked weird & wonderful finds from around the web.
                 </motion.p>
-                <motion.div 
-                    className="flex flex-col sm:flex-row justify-center gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                >
-                    <Link to={createPageUrl('Categories')}>
-                        <Button size="lg" className="text-lg font-bold rounded-full px-8 py-6 bg-[var(--color-purple)] hover:bg-purple-700 w-full sm:w-auto">Explore the Fun</Button>
-                    </Link>
-                    <Link to={createPageUrl('MysteryBox')}>
-                        <Button size="lg" variant="outline" className="text-lg font-bold rounded-full px-8 py-6 border-4 border-[var(--color-teal)] hover:bg-teal-500/10 text-[var(--color-teal)] w-full sm:w-auto">Spin the Wheel</Button>
-                    </Link>
-                </motion.div>
+
             </section>
 
             {/* Featured Products */}
