@@ -100,6 +100,10 @@ function LayoutContent({ children }) {
                 .font-coiny {
                     font-family: 'Coiny', cursive !important;
                 }
+                .font-heading {
+                    font-family: 'DynaPuff', cursive !important;
+                    font-weight: 400 !important;
+                }
             `}</style>
             <div className="min-h-screen bg-off-white dark:bg-gray-900 text-dark dark:text-off-white transition-colors duration-300">
                 
@@ -151,7 +155,7 @@ const Header = ({ user, isDarkMode, toggleTheme, isMenuOpen, setIsMenuOpen, isSe
                 <nav className="hidden md:flex items-center gap-10">
                     {navItems.map(item => (
                         <motion.div key={item.title} whileHover={{ y: -3 }}>
-                            <Link to={item.href} className={`font-medium text-base transition-colors ${location.pathname === item.href ? 'text-[var(--color-pink)]' : 'hover:text-[var(--color-pink)]'}`}>
+                            <Link to={item.href} className={`font-heading text-base transition-colors ${location.pathname === item.href ? 'text-[var(--color-pink)]' : 'hover:text-[var(--color-pink)]'}`}>
                                 {item.title}
                             </Link>
                         </motion.div>
@@ -213,7 +217,7 @@ const Header = ({ user, isDarkMode, toggleTheme, isMenuOpen, setIsMenuOpen, isSe
                 >
                     <nav className="flex flex-col items-center space-y-6">
                         {navItems.map(item => (
-                            <Link key={item.title} to={item.href} className="font-medium text-base" onClick={() => setIsMenuOpen(false)}>{item.title}</Link>
+                            <Link key={item.title} to={item.href} className="font-heading text-base" onClick={() => setIsMenuOpen(false)}>{item.title}</Link>
                         ))}
                     </nav>
                 </motion.div>
